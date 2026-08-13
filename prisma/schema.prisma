@@ -1,0 +1,196 @@
+// Banco de dados do Yeshua Jiu-Jitsu
+//
+// IMPORTANTE: este schema foi escrito para ser portavel.
+// Em desenvolvimento usamos SQLite (arquivo local, zero configuracao).
+// Para publicar na Vercel, basta trocar `provider = "sqlite"` por
+// `provider = "postgresql"` abaixo. Nada mais precisa mudar --
+// por isso nao usamos enums nativos nem tipos especificos de banco.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Pessoas
+// ---------------------------------------------------------------------------
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  passwordHash       String
+  name               String
+  role               String   @default("ALUNO") // ALUNO | PROFESSOR | ADMIN
+  active             Boolean  @default(true)
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  student            Student?            @relation("StudentProfile")
+  studentsResponsible Student[]          @relation("ResponsibleProfessor")
+  graduationsAwarded Graduation[]        @relation("AwardedBy")
+  sessionsTaught     AttendanceSession[] @relation("SessionProfessor")
+  schedulesTaught    ClassSchedule[]     @relation("ScheduleProfessor")
+  notesAuthored      StudentNote[]       @relation("NoteAuthor")
+
+  @@index([role])
+}
+
+model Student {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation("StudentProfile", fields: [userId], references: [id], onDelete: Cascade)
+
+  photoUrl     String?
+  phone        String?
+  birthDate    DateTime?
+  joinedAt     DateTime  @default(now()) // data de entrada na academia
+
+  professorId  String?
+  professor    User?     @relation("ResponsibleProfessor", fields: [professorId], references: [id], onDelete: SetNull)
+
+  // graduacao atual
+  belt         String    @default("BRANCA") // BRANCA | AZUL | ROXA | MARROM | PRETA
+  degree       Int       @default(0) // 0 a 4 graus
+  beltSinceAt  DateTime  @default(now()) // desde quando esta nesta faixa/grau
+
+  // metas e status
+  monthlyGoal  Int       @default(12) // meta de treinos por mes
+  active       Boolean   @default(true)
+  isCompetitor Boolean   @default(false)
+
+  guardianName     String? // responsavel, para alunos menores de idade
+  emergencyContact String?
+  observations     String?
+
+  graduations  Graduation[]
+  attendances  Attendance[]
+  journal      StudentNote[]
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([belt])
+  @@index([active])
+}
+
+// ---------------------------------------------------------------------------
+// Graduacoes
+// ---------------------------------------------------------------------------
+
+model Graduation {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  belt        String
+  degree      Int
+  date        DateTime
+
+  awardedById String?
+  awardedBy   User?    @relation("AwardedBy", fields: [awardedById], references: [id], onDelete: SetNull)
+
+  photoUrl    String?
+  notes       String?
+  criteria    String? // JSON: [{ "nome": "Defesa pessoal", "nota": 4 }]
+
+  createdAt   DateTime @default(now())
+
+  @@index([studentId, date])
+}
+
+// ---------------------------------------------------------------------------
+// Aulas, agenda e presenca
+// ---------------------------------------------------------------------------
+
+// Horario fixo e recorrente da semana. Ex.: Segunda, 19:00, Jiu-Jitsu Gi.
+model ClassSchedule {
+  id          String  @id @default(cuid())
+  weekday     Int // 0 = domingo ... 6 = sabado
+  startTime   String // "19:00"
+  endTime     String // "20:30"
+  title       String
+  type        String  @default("GI") // GI | NOGI | KIDS | OPEN_MAT | FEMININO | BOXE
+  professorId String?
+  professor   User?   @relation("ScheduleProfessor", fields: [professorId], references: [id], onDelete: SetNull)
+  active      Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  sessions    AttendanceSession[]
+
+  @@index([weekday, active])
+}
+
+// Uma aula que realmente aconteceu, com a chamada feita pelo professor.
+model AttendanceSession {
+  id          String   @id @default(cuid())
+  date        DateTime
+  title       String
+  type        String   @default("GI")
+
+  scheduleId  String?
+  schedule    ClassSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+
+  professorId String?
+  professor   User?    @relation("SessionProfessor", fields: [professorId], references: [id], onDelete: SetNull)
+
+  techniques  String? // tecnicas ensinadas na aula
+  notes       String?
+
+  attendances Attendance[]
+
+  createdAt   DateTime @default(now())
+
+  @@index([date])
+}
+
+model Attendance {
+  id        String            @id @default(cuid())
+  sessionId String
+  session   AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId String
+  student   Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  present   Boolean           @default(true)
+  createdAt DateTime          @default(now())
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+}
+
+// Eventos avulsos da agenda: campeonato, graduacao, seminario, confraternizacao.
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  type        String    @default("OUTRO") // CAMPEONATO | GRADUACAO | SEMINARIO | TREINO_ESPECIAL | CONFRATERNIZACAO | OUTRO
+  startsAt    DateTime
+  endsAt      DateTime?
+  location    String?
+  description String?
+  imageUrl    String?
+  link        String?
+  createdAt   DateTime  @default(now())
+
+  @@index([startsAt])
+}
+
+// ---------------------------------------------------------------------------
+// Diario do aluno (observacoes do professor)
+// ---------------------------------------------------------------------------
+
+model StudentNote {
+  id               String   @id @default(cuid())
+  studentId        String
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  authorId         String?
+  author           User?    @relation("NoteAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  content          String
+  date             DateTime @default(now())
+  visibleToStudent Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([studentId, date])
+}

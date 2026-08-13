@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Yeshua Jiu-Jitsu - Sistema de Design
+   Paleta da marca: branco, preto e marrom (do logo da academia).
+   As cores de faixa sao tokens funcionais do esporte, nao da marca.
+   ========================================================================== */
+
+@theme {
+  /* ---- Marrom da marca (base: o marrom da cruz do logo) ---- */
+  --color-brand-50: #faf6f1;
+  --color-brand-100: #f2e9de;
+  --color-brand-200: #e4d2bf;
+  --color-brand-300: #d0b393;
+  --color-brand-400: #b98d63;
+  --color-brand-500: #9c6b3e;
+  --color-brand-600: #7f5430; /* primaria: 6.5:1 sobre branco */
+  --color-brand-700: #653f24;
+  --color-brand-800: #4c2f1b;
+  --color-brand-900: #2e1c10;
+
+  /* ---- Preto / neutros quentes ---- */
+  --color-ink: #14100d;
+  --color-ink-800: #241d18;
+  --color-ink-700: #3a3029;
+  --color-ink-500: #6b6259; /* texto secundario: 6.0:1 sobre branco */
+  --color-ink-300: #b3aaa1;
+  --color-ink-200: #e7e1da; /* bordas */
+  --color-ink-100: #f6f4f1; /* superficie suave */
+
+  /* ---- Semanticos ---- */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f6f4f1;
+  --color-line: #e7e1da;
+  --color-success: #16794a;
+  --color-warning: #a35a09;
+  --color-danger: #b42318;
+
+  /* ---- Faixas (Jiu-Jitsu adulto) ---- */
+  --color-belt-branca: #f2f0ed;
+  --color-belt-azul: #1e4b8f;
+  --color-belt-roxa: #5b2c87;
+  --color-belt-marrom: #6b4423;
+  --color-belt-preta: #111111;
+
+  /* ---- Tipografia ---- */
+  --font-display: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-barlow), system-ui, sans-serif;
+
+  /* ---- Escala de espacamento (ritmo de 4px) ---- */
+  --radius-card: 14px;
+  --radius-pill: 999px;
+
+  /* ---- Sombras (escala unica, consistente) ---- */
+  --shadow-card: 0 1px 2px rgb(20 16 13 / 0.05), 0 1px 3px rgb(20 16 13 / 0.06);
+  --shadow-raised: 0 4px 12px rgb(20 16 13 / 0.08), 0 2px 4px rgb(20 16 13 / 0.04);
+  --shadow-overlay: 0 16px 48px rgb(20 16 13 / 0.18);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  letter-spacing: 0.005em;
+  font-weight: 700;
+}
+
+/* Numeros alinhados em tabelas, contadores e estatisticas */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visivel e consistente em todo o app (acessibilidade) */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Elimina o atraso de 300ms no toque em celular */
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Respeita quem desativou animacoes no sistema */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Utilitarios de marca
+   ========================================================================== */
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Fundo preto texturizado usado nas secoes de destaque do site publico */
+.bg-tatame {
+  background-color: var(--color-ink);
+  background-image:
+    radial-gradient(circle at 18% 12%, rgb(156 107 62 / 0.28), transparent 55%),
+    radial-gradient(circle at 82% 88%, rgb(127 84 48 / 0.22), transparent 50%);
+}
+
+/* Animacao de entrada dos cartoes (curta, 220ms, ease-out) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: rise 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Barra de progresso circular / linear usa apenas transform e opacity */
+.transition-smooth {
+  transition-property: transform, opacity, background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}

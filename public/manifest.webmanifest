@@ -1,0 +1,20 @@
+{
+  "name": "Yeshua Jiu-Jitsu",
+  "short_name": "Yeshua JJ",
+  "description": "Acompanhe seus treinos, sua frequência e sua evolução no Jiu-Jitsu.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#14100d",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
