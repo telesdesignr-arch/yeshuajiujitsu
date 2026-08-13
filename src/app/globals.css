@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* A detecção automática de arquivos do Tailwind v4 não funciona quando o
+   caminho do projeto tem espaço no nome ("yeshua JJ"). Apontamos os arquivos
+   explicitamente para que todas as classes sejam geradas. */
+@source "../**/*.{ts,tsx}";
+
 /* ==========================================================================
    Yeshua Jiu-Jitsu - Sistema de Design
    Paleta da marca: branco, preto e marrom (do logo da academia).

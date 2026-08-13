@@ -12,8 +12,9 @@ function Inner({ className, label }: { className?: string; label?: string }) {
     <button
       type="submit"
       disabled={pending}
+      aria-label="Sair da conta"
       className={cn(
-        "inline-flex cursor-pointer items-center gap-2 text-sm font-semibold transition-smooth disabled:opacity-50",
+        "inline-flex cursor-pointer items-center gap-2 rounded-[10px] text-sm font-semibold transition-smooth disabled:opacity-50",
         className,
       )}
     >

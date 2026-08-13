@@ -70,7 +70,9 @@ export default async function AppHome() {
             {graduationLabel(student.belt, student.degree)}
           </p>
 
-          <div className="my-4">
+          {/* fundo claro atrás da faixa: sem ele a ponteira preta some no
+              cartão escuro */}
+          <div className="my-4 rounded-[10px] bg-white/10 p-2">
             <BeltBar belt={student.belt} degree={student.degree} height={38} />
           </div>
 

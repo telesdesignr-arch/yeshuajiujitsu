@@ -82,7 +82,7 @@ export default async function EvolucaoPage() {
           <p className="mt-1.5 font-display text-2xl font-bold tracking-wide uppercase">
             {graduationLabel(student.belt, student.degree)}
           </p>
-          <div className="my-4">
+          <div className="my-4 rounded-[10px] bg-white/10 p-2">
             <BeltBar belt={student.belt} degree={student.degree} height={40} />
           </div>
           <dl className="grid grid-cols-2 gap-4 border-t border-white/12 pt-4 text-sm">

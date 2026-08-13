@@ -106,22 +106,26 @@ type SeedStudent = {
   phone?: string;
 };
 
+// Os valores de gradeAgeMonths foram escolhidos para dar uma turma realista:
+// alguns prontos para graduar, alguns a caminho, e dois que já cumpriram o
+// tempo mas sumiram do tatame (Anderson e Marcelo) -- justamente o caso que a
+// tela de graduações precisa mostrar como "ainda não".
 const ALUNOS: SeedStudent[] = [
-  { name: "João Silva", email: "joao@exemplo.com", belt: "AZUL", degree: 2, gradeAgeMonths: 8, consistency: 0.92, competitor: true, monthlyGoal: 15, phone: "(21) 98888-1001" },
-  { name: "Pedro Henrique Alves", email: "pedro@exemplo.com", belt: "AZUL", degree: 3, gradeAgeMonths: 7, consistency: 0.78, competitor: true, phone: "(21) 98888-1002" },
+  { name: "João Silva", email: "joao@exemplo.com", belt: "AZUL", degree: 2, gradeAgeMonths: 7, consistency: 0.92, competitor: true, monthlyGoal: 15, phone: "(21) 98888-1001" },
+  { name: "Pedro Henrique Alves", email: "pedro@exemplo.com", belt: "AZUL", degree: 3, gradeAgeMonths: 4, consistency: 0.78, competitor: true, phone: "(21) 98888-1002" },
   { name: "Mariana Costa", email: "mariana@exemplo.com", belt: "ROXA", degree: 1, gradeAgeMonths: 6, consistency: 0.88, competitor: true, monthlyGoal: 14, phone: "(21) 98888-1003" },
-  { name: "Lucas Teles", email: "lucas@exemplo.com", belt: "BRANCA", degree: 3, gradeAgeMonths: 5, consistency: 0.85, monthlyGoal: 12, phone: "(21) 98888-1004" },
-  { name: "Rafael Moreira", email: "rafael@exemplo.com", belt: "BRANCA", degree: 4, gradeAgeMonths: 7, consistency: 0.7, phone: "(21) 98888-1005" },
-  { name: "Camila Duarte", email: "camila@exemplo.com", belt: "BRANCA", degree: 1, gradeAgeMonths: 4, consistency: 0.63, monthlyGoal: 10, phone: "(21) 98888-1006" },
-  { name: "Bruno Cardoso", email: "bruno@exemplo.com", belt: "MARROM", degree: 2, gradeAgeMonths: 9, consistency: 0.74, competitor: true, phone: "(21) 98888-1007" },
+  { name: "Lucas Teles", email: "lucas@exemplo.com", belt: "BRANCA", degree: 3, gradeAgeMonths: 2, consistency: 0.85, monthlyGoal: 12, phone: "(21) 98888-1004" },
+  { name: "Rafael Moreira", email: "rafael@exemplo.com", belt: "BRANCA", degree: 4, gradeAgeMonths: 3, consistency: 0.7, phone: "(21) 98888-1005" },
+  { name: "Camila Duarte", email: "camila@exemplo.com", belt: "BRANCA", degree: 1, gradeAgeMonths: 3, consistency: 0.63, monthlyGoal: 10, phone: "(21) 98888-1006" },
+  { name: "Bruno Cardoso", email: "bruno@exemplo.com", belt: "MARROM", degree: 2, gradeAgeMonths: 5, consistency: 0.74, competitor: true, phone: "(21) 98888-1007" },
   { name: "Thiago Nogueira", email: "thiago@exemplo.com", belt: "AZUL", degree: 0, gradeAgeMonths: 3, consistency: 0.55, phone: "(21) 98888-1008" },
-  { name: "Larissa Prado", email: "larissa@exemplo.com", belt: "BRANCA", degree: 2, gradeAgeMonths: 5, consistency: 0.8, monthlyGoal: 10, phone: "(21) 98888-1009" },
-  { name: "Vinícius Barreto", email: "vinicius@exemplo.com", belt: "BRANCA", degree: 0, gradeAgeMonths: 2, consistency: 0.48, phone: "(21) 98888-1010" },
-  { name: "Diego Fontes", email: "diego@exemplo.com", belt: "ROXA", degree: 3, gradeAgeMonths: 5, consistency: 0.66, phone: "(21) 98888-1011" },
-  { name: "Anderson Lima", email: "anderson@exemplo.com", belt: "BRANCA", degree: 1, gradeAgeMonths: 6, consistency: 0.22, phone: "(21) 98888-1012" },
-  { name: "Fernanda Rocha", email: "fernanda@exemplo.com", belt: "AZUL", degree: 1, gradeAgeMonths: 6, consistency: 0.71, monthlyGoal: 12, phone: "(21) 98888-1013" },
-  { name: "Gabriel Souza", email: "gabriel@exemplo.com", belt: "BRANCA", degree: 4, gradeAgeMonths: 8, consistency: 0.9, competitor: true, monthlyGoal: 16, phone: "(21) 98888-1014" },
-  { name: "Marcelo Antunes", email: "marcelo@exemplo.com", belt: "BRANCA", degree: 2, gradeAgeMonths: 4, consistency: 0.31, phone: "(21) 98888-1015" },
+  { name: "Larissa Prado", email: "larissa@exemplo.com", belt: "BRANCA", degree: 2, gradeAgeMonths: 3, consistency: 0.8, monthlyGoal: 10, phone: "(21) 98888-1009" },
+  { name: "Vinícius Barreto", email: "vinicius@exemplo.com", belt: "BRANCA", degree: 0, gradeAgeMonths: 1, consistency: 0.48, phone: "(21) 98888-1010" },
+  { name: "Diego Fontes", email: "diego@exemplo.com", belt: "ROXA", degree: 3, gradeAgeMonths: 2, consistency: 0.66, phone: "(21) 98888-1011" },
+  { name: "Anderson Lima", email: "anderson@exemplo.com", belt: "BRANCA", degree: 1, gradeAgeMonths: 5, consistency: 0.22, phone: "(21) 98888-1012" },
+  { name: "Fernanda Rocha", email: "fernanda@exemplo.com", belt: "AZUL", degree: 1, gradeAgeMonths: 4, consistency: 0.71, monthlyGoal: 12, phone: "(21) 98888-1013" },
+  { name: "Gabriel Souza", email: "gabriel@exemplo.com", belt: "BRANCA", degree: 4, gradeAgeMonths: 7, consistency: 0.9, competitor: true, monthlyGoal: 16, phone: "(21) 98888-1014" },
+  { name: "Marcelo Antunes", email: "marcelo@exemplo.com", belt: "BRANCA", degree: 2, gradeAgeMonths: 5, consistency: 0.31, phone: "(21) 98888-1015" },
 ];
 
 const OBSERVACOES = [

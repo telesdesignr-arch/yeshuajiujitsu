@@ -50,7 +50,7 @@ export function BarChart({
   return (
     <figure className={className}>
       <div
-        className="flex items-end justify-between gap-1.5"
+        className="flex gap-1.5"
         style={{ height }}
         role="img"
         aria-label={caption}
@@ -59,7 +59,7 @@ export function BarChart({
           const h = (d.value / max) * 100;
           const targetH = d.target ? (d.target / max) * 100 : null;
           return (
-            <div key={i} className="flex min-w-0 flex-1 flex-col justify-end">
+            <div key={i} className="flex min-w-0 flex-1 flex-col">
               <span
                 className={cn(
                   "tabular mb-1 text-center text-[11px] font-bold",
@@ -69,7 +69,8 @@ export function BarChart({
                 {d.value}
                 {unit}
               </span>
-              <div className="relative w-full" style={{ height: "100%" }}>
+              {/* flex-1 faz a área da barra ocupar toda a altura restante */}
+              <div className="relative w-full flex-1">
                 {targetH !== null && (
                   <span
                     aria-hidden

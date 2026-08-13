@@ -427,8 +427,11 @@ export async function getGraduationCandidates(): Promise<GraduationCandidate[]> 
       totalTrainings: r?.totalTrainings ?? 0,
       proximoLabel: step.label,
       progresso,
-      // "Pronto" = cumpriu o tempo de referência e vem treinando de verdade.
-      pronto: progresso >= 1 && recentPercent >= 50,
+      // "Pronto" = cumpriu o tempo de referência E vem treinando de verdade.
+      // A porta da frequência é o que separa "está há muito tempo na faixa"
+      // de "merece o grau": quem sumiu do tatame aparece em "chegando lá",
+      // não aqui.
+      pronto: progresso >= 1 && recentPercent >= 60,
     };
   });
 

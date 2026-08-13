@@ -22,13 +22,19 @@ export default async function PainelLayout({
           <Link href="/painel" aria-label="Painel">
             <Wordmark size={32} />
           </Link>
-          <Link
-            href="/app"
-            className="inline-flex items-center gap-1.5 rounded-pill border border-line px-3 py-1.5 text-xs font-semibold text-ink-500 transition-smooth hover:bg-ink-100 hover:text-ink"
-          >
-            <Smartphone aria-hidden className="size-3.5" />
-            Ver como aluno
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              href="/app"
+              className="inline-flex items-center gap-1.5 rounded-pill border border-line px-3 py-1.5 text-xs font-semibold text-ink-500 transition-smooth hover:bg-ink-100 hover:text-ink"
+            >
+              <Smartphone aria-hidden className="size-3.5" />
+              Ver como aluno
+            </Link>
+            <LogoutButton
+              label=""
+              className="size-11 justify-center text-ink-500 hover:text-danger"
+            />
+          </div>
         </div>
       </header>
 
