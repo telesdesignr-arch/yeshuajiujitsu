@@ -164,7 +164,42 @@ function buildGraduationHistory(belt: string, degree: number, currentSince: Date
   return steps.map((s, i) => ({ ...s, date: dates[i] }));
 }
 
+/**
+ * Trava de seguranca.
+ *
+ * Este script APAGA tudo antes de recriar. Enquanto o banco era um arquivo
+ * local isso era inofensivo. Agora que o .env pode apontar para o banco de
+ * producao (com os alunos de verdade da academia), um comando distraido
+ * apagaria a academia inteira.
+ *
+ * Em banco que nao seja local, o script so roda se quem chamou disser
+ * explicitamente que e isso mesmo:
+ *   CONFIRMAR_SEED_EM_PRODUCAO=sim npm run db:seed
+ */
+function conferirBanco() {
+  const url = process.env.DATABASE_URL ?? "";
+  const ehLocal =
+    url.startsWith("file:") ||
+    url.includes("localhost") ||
+    url.includes("127.0.0.1");
+
+  if (ehLocal || process.env.CONFIRMAR_SEED_EM_PRODUCAO === "sim") return;
+
+  console.error("");
+  console.error("  PAREI POR SEGURANCA.");
+  console.error("");
+  console.error("  O DATABASE_URL nao aponta para um banco local, e este");
+  console.error("  script apaga TODOS os dados antes de recriar.");
+  console.error("");
+  console.error("  Se voce tem certeza de que quer apagar este banco, rode:");
+  console.error("    CONFIRMAR_SEED_EM_PRODUCAO=sim npm run db:seed");
+  console.error("");
+  process.exit(1);
+}
+
 async function main() {
+  conferirBanco();
+
   console.log("Limpando dados antigos...");
   await prisma.attendance.deleteMany();
   await prisma.attendanceSession.deleteMany();
