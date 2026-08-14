@@ -9,23 +9,26 @@ import {
   Shirt,
   ShieldCheck,
   Sparkles,
+  Trophy,
   Users,
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
+import { MedalTallyRow } from "@/components/medal";
 import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/misc";
 import { TRACK_LABEL, beltsDaTrilha } from "@/lib/belts";
 import { ACADEMIA, whatsappLink } from "@/lib/academia";
-import { WEEKDAYS, formatDateLong } from "@/lib/dates";
+import { modalityLabel, tallyMedals } from "@/lib/competitions";
+import { WEEKDAYS, formatDateLong, formatDateShortYear } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [schedules, events, alunosAtivos] = await Promise.all([
+  const [schedules, events, alunosAtivos, campeonatos, resultados] = await Promise.all([
     prisma.classSchedule.findMany({
       where: { active: true },
       orderBy: [{ weekday: "asc" }, { startTime: "asc" }],
@@ -36,7 +39,17 @@ export default async function HomePage() {
       take: 4,
     }),
     prisma.student.count({ where: { active: true } }),
+    prisma.competition.findMany({
+      where: { date: { gte: new Date() } },
+      orderBy: { date: "asc" },
+      take: 4,
+    }),
+    prisma.competitionResult.findMany({
+      select: { placement: true, competitionId: true },
+    }),
   ]);
+
+  const medalhas = tallyMedals(resultados);
 
   // Agrupa a grade por dia da semana, começando na segunda-feira.
   const ordemDias = [1, 2, 3, 4, 5, 6, 0];
@@ -320,6 +333,76 @@ export default async function HomePage() {
           <p className="mt-4 max-w-2xl text-lg text-ink-500">
             Campeonatos, graduações, seminários e os treinos especiais da equipe.
           </p>
+
+          {/* Campeonatos */}
+          {campeonatos.length > 0 && (
+            <div className="mt-10">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
+                  Campeonatos
+                </h3>
+                {medalhas.podios > 0 && (
+                  <div className="flex items-center gap-2 text-sm text-ink-500">
+                    <span className="font-semibold text-ink">
+                      {medalhas.podios}{" "}
+                      {medalhas.podios === 1 ? "pódio" : "pódios"}
+                    </span>
+                    <span>conquistados pela equipe</span>
+                    <MedalTallyRow
+                      ouro={medalhas.ouro}
+                      prata={medalhas.prata}
+                      bronze={medalhas.bronze}
+                      size={18}
+                      className="gap-2.5"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {campeonatos.map((c) => (
+                  <Card key={c.id}>
+                    <CardBody className="pt-5">
+                      <Badge tone="warning">
+                        <Trophy aria-hidden className="size-3.5" />
+                        {modalityLabel(c.modality)}
+                      </Badge>
+                      <h4 className="mt-3 font-display text-xl leading-tight font-bold tracking-wide uppercase">
+                        {c.name}
+                      </h4>
+                      <p className="mt-1.5 flex items-center gap-1.5 text-sm font-semibold text-brand-700 first-letter:uppercase">
+                        <CalendarDays aria-hidden className="size-4" />
+                        {formatDateLong(c.date)}
+                      </p>
+                      {c.location && (
+                        <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500">
+                          <MapPin aria-hidden className="size-4" />
+                          {c.location}
+                        </p>
+                      )}
+                      {c.registrationDeadline && (
+                        <p className="mt-3 inline-flex rounded-[6px] bg-warning/10 px-2.5 py-1 text-xs font-semibold text-warning">
+                          Inscrições até{" "}
+                          {formatDateShortYear(c.registrationDeadline)}
+                        </p>
+                      )}
+                      {c.description && (
+                        <p className="mt-3 text-[15px] leading-relaxed text-ink-500">
+                          {c.description}
+                        </p>
+                      )}
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {campeonatos.length > 0 && events.length > 0 && (
+            <h3 className="mt-12 mb-4 font-display text-2xl font-bold tracking-wide uppercase">
+              Outros eventos
+            </h3>
+          )}
 
           {events.length === 0 ? (
             <p className="mt-10 text-ink-500">

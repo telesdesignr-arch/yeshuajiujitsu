@@ -61,13 +61,17 @@ export function EventoForm() {
         />
       </Field>
 
+      {/* Campeonato nao entra aqui: tem tela propria, com prazo de inscricao
+          e resultados por atleta. */}
       <Field label="Tipo" htmlFor="ev-type" required>
-        <Select id="ev-type" name="type" defaultValue="CAMPEONATO" required>
-          {Object.entries(EVENT_TYPES).map(([key, info]) => (
-            <option key={key} value={key}>
-              {info.label}
-            </option>
-          ))}
+        <Select id="ev-type" name="type" defaultValue="GRADUACAO" required>
+          {Object.entries(EVENT_TYPES)
+            .filter(([key]) => key !== "CAMPEONATO")
+            .map(([key, info]) => (
+              <option key={key} value={key}>
+                {info.label}
+              </option>
+            ))}
         </Select>
       </Field>
 

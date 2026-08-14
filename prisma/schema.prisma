@@ -70,6 +70,7 @@ model Student {
   graduations  Graduation[]
   attendances  Attendance[]
   journal      StudentNote[]
+  results      CompetitionResult[]
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -186,6 +187,53 @@ model Event {
   createdAt   DateTime  @default(now())
 
   @@index([startsAt])
+}
+
+// ---------------------------------------------------------------------------
+// Campeonatos
+// ---------------------------------------------------------------------------
+
+// Um campeonato e uma entidade propria, e nao apenas um item da agenda: tem
+// prazo de inscricao, modalidade, link de inscricao e -- principalmente --
+// os resultados de cada atleta da equipe.
+model Competition {
+  id                   String    @id @default(cuid())
+  name                 String
+  date                 DateTime
+  endDate              DateTime?
+  location             String?
+  organizer            String? // IBJJF, CBJJ, federacao estadual...
+  modality             String    @default("GI") // GI | NOGI | AMBOS
+  registrationUrl      String?
+  registrationDeadline DateTime?
+  description          String?
+  createdAt            DateTime  @default(now())
+
+  results CompetitionResult[]
+
+  @@index([date])
+}
+
+model CompetitionResult {
+  id            String      @id @default(cuid())
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  studentId     String
+  student       Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // 1, 2, 3 = podio. 0 = participou sem medalha. 4+ = colocacao informada.
+  placement Int     @default(0)
+  // Categoria em que lutou: "Azul · Medio", "Absoluto", "Infantil A"...
+  // Um mesmo atleta pode ter mais de um resultado no mesmo campeonato
+  // (peso e absoluto), por isso nao ha restricao de unicidade aqui.
+  category  String?
+  modality  String  @default("GI") // GI | NOGI
+  notes     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+  @@index([competitionId])
 }
 
 // ---------------------------------------------------------------------------

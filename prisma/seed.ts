@@ -470,6 +470,108 @@ async function main() {
     await prisma.event.create({ data: e });
   }
 
+  // -------------------------------------------------------------------------
+  // Campeonatos e resultados (FICTICIOS)
+  // -------------------------------------------------------------------------
+  console.log("Criando campeonatos...");
+
+  const passado1 = await prisma.competition.create({
+    data: {
+      name: "Copa Rio de Jiu-Jitsu 2026",
+      date: atHour(addMonths(hoje, -4), "08:00"),
+      location: "Tijuca Tênis Clube — Rio de Janeiro",
+      organizer: "FJJRIO",
+      modality: "GI",
+      description:
+        "Etapa estadual com chaves do infantil ao master. A equipe levou nove atletas.",
+    },
+  });
+
+  const passado2 = await prisma.competition.create({
+    data: {
+      name: "Rio Winter No-Gi Open 2026",
+      date: atHour(addMonths(hoje, -2), "09:00"),
+      location: "CEFAN — Rio de Janeiro",
+      organizer: "CBJJD",
+      modality: "NOGI",
+      description: "Primeira competição sem kimono da equipe no ano.",
+    },
+  });
+
+  const futuro1 = await prisma.competition.create({
+    data: {
+      name: "Campeonato Estadual de Jiu-Jitsu 2026",
+      date: atHour(addMonths(hoje, 2), "08:00"),
+      endDate: atHour(addMonths(hoje, 2), "18:00"),
+      location: "Ginásio do Maracanãzinho — Rio de Janeiro",
+      organizer: "FJJRIO",
+      modality: "AMBOS",
+      registrationDeadline: atHour(addMonths(hoje, 1), "23:59"),
+      registrationUrl: "https://www.fjjrio.app.br/",
+      description:
+        "Principal campeonato do estado. Chaves com e sem kimono, do infantil ao master. Fale com o professor Renato para acertar categoria e peso antes de se inscrever.",
+    },
+  });
+
+  await prisma.competition.create({
+    data: {
+      name: "Rio Spring International Open 2026",
+      date: atHour(addMonths(hoje, 3), "08:00"),
+      location: "Rio de Janeiro — RJ",
+      organizer: "CBJJ / IBJJF",
+      modality: "GI",
+      registrationDeadline: atHour(addMonths(hoje, 2), "23:59"),
+      registrationUrl: "https://cbjj.com.br/events/championships",
+      description:
+        "Campeonato internacional da IBJJF. Exige filiação e carteirinha em dia.",
+    },
+  });
+
+  // Resultados dos passados
+  const porEmail = new Map(
+    ALUNOS.map((a, i) => [a.email, alunosCriados[i]?.id]).filter(
+      (x): x is [string, string] => Boolean(x[1]),
+    ),
+  );
+
+  const resultados = [
+    { email: "joao@exemplo.com", comp: passado1.id, placement: 1, category: "Azul · Adulto · Médio", modality: "GI", notes: "Finalizou as três lutas: duas por armlock e uma por estrangulamento." },
+    { email: "joao@exemplo.com", comp: passado1.id, placement: 3, category: "Absoluto", modality: "GI" },
+    { email: "mariana@exemplo.com", comp: passado1.id, placement: 1, category: "Roxa · Adulto · Leve", modality: "GI" },
+    { email: "bruno@exemplo.com", comp: passado1.id, placement: 2, category: "Marrom · Master 1 · Pesado", modality: "GI" },
+    { email: "pedro@exemplo.com", comp: passado1.id, placement: 3, category: "Azul · Adulto · Pena", modality: "GI" },
+    { email: "gabriel@exemplo.com", comp: passado1.id, placement: 0, category: "Branca · Adulto · Médio", modality: "GI", notes: "Primeira competição. Perdeu na semifinal nos pontos." },
+    { email: "enzo@exemplo.com", comp: passado1.id, placement: 1, category: "Amarela e Preta · Infantil B", modality: "GI" },
+    { email: "joao@exemplo.com", comp: passado2.id, placement: 2, category: "Azul · Adulto · Médio", modality: "NOGI" },
+    { email: "mariana@exemplo.com", comp: passado2.id, placement: 1, category: "Roxa · Adulto · Leve", modality: "NOGI" },
+    { email: "enzo@exemplo.com", comp: passado2.id, placement: 3, category: "Infantil B", modality: "NOGI" },
+    { email: "bruno@exemplo.com", comp: passado2.id, placement: 0, category: "Marrom · Master 1", modality: "NOGI" },
+  ];
+
+  let registrados = 0;
+  for (const r of resultados) {
+    const studentId = porEmail.get(r.email);
+    if (!studentId) continue;
+    await prisma.competitionResult.create({
+      data: {
+        competitionId: r.comp,
+        studentId,
+        placement: r.placement,
+        category: r.category,
+        modality: r.modality,
+        notes: r.notes ?? null,
+      },
+    });
+    await prisma.student.update({
+      where: { id: studentId },
+      data: { isCompetitor: true },
+    });
+    registrados += 1;
+  }
+
+  console.log(`  ${registrados} resultados de campeonato`);
+  void futuro1;
+
   console.log("");
   console.log("Pronto!");
   console.log(`  ${ALUNOS.length} alunos`);

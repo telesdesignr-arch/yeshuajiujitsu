@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
-import { CalendarDays, CalendarPlus, Clock, MapPin, Trash2 } from "lucide-react";
+import Link from "next/link";
+import {
+  CalendarDays,
+  CalendarPlus,
+  ChevronRight,
+  Clock,
+  MapPin,
+  Trash2,
+  Trophy,
+} from "lucide-react";
 
 import { EventoForm, HorarioForm } from "./formularios";
 import { deleteEvent, deleteSchedule } from "@/actions/painel";
@@ -49,9 +58,30 @@ export default async function PainelAgendaPage() {
         </p>
       </div>
 
+      {/* Campeonato tem tela propria, com inscricao e resultados. */}
+      <Card>
+        <Link
+          href="/painel/campeonatos"
+          className="flex min-h-[64px] items-center gap-3 px-4 py-3 transition-smooth hover:bg-ink-100/60 sm:px-5"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-700">
+            <Trophy aria-hidden className="size-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-base font-bold tracking-wide uppercase">
+              Campeonatos
+            </span>
+            <span className="block text-xs text-ink-500">
+              Divulgar competições e registrar os resultados da equipe
+            </span>
+          </span>
+          <ChevronRight aria-hidden className="size-4 shrink-0 text-ink-300" />
+        </Link>
+      </Card>
+
       <Collapsible
         title="Novo evento"
-        description="Campeonato, graduação, seminário, confraternização"
+        description="Graduação, seminário, treino especial, confraternização"
         icon={CalendarPlus}
       >
         <EventoForm />

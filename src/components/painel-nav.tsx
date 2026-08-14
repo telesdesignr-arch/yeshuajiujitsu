@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   GraduationCap,
   LayoutDashboard,
+  Trophy,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -15,12 +16,21 @@ import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 
+// O menu inferior do celular fica em 5 itens de proposito: acima disso os
+// alvos ficam estreitos demais para o dedo. Campeonatos, que o professor abre
+// uma vez por mes, entra pela Agenda e pela Visao geral.
 const ITEMS: Item[] = [
   { href: "/painel", label: "Visão geral", icon: LayoutDashboard, exact: true },
   { href: "/painel/chamada", label: "Chamada", icon: ClipboardCheck },
   { href: "/painel/alunos", label: "Alunos", icon: Users },
   { href: "/painel/graduacoes", label: "Graduações", icon: GraduationCap },
   { href: "/painel/agenda", label: "Agenda", icon: CalendarDays },
+];
+
+// No computador sobra espaco na lateral, entao Campeonatos aparece direto.
+const ITEMS_LATERAL: Item[] = [
+  ...ITEMS,
+  { href: "/painel/campeonatos", label: "Campeonatos", icon: Trophy },
 ];
 
 function useActive() {
@@ -81,7 +91,7 @@ export function PainelSidebarNav() {
 
   return (
     <nav aria-label="Navegação do painel" className="space-y-1">
-      {ITEMS.map((item) => {
+      {ITEMS_LATERAL.map((item) => {
         const active = isActive(item);
         const Icon = item.icon;
         return (

@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
-import { CalendarDays, Clock, MapPin } from "lucide-react";
+import Link from "next/link";
+import { CalendarDays, ChevronRight, Clock, MapPin, Trophy } from "lucide-react";
 
 import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState } from "@/components/ui/misc";
 import { requireUser } from "@/lib/auth";
-import { WEEKDAYS, agora, formatDateLong, formatTime } from "@/lib/dates";
+import { modalityLabel } from "@/lib/competitions";
+import {
+  WEEKDAYS,
+  agora,
+  formatDateLong,
+  formatDateShortYear,
+  formatTime,
+} from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Agenda" };
@@ -14,7 +22,7 @@ export const dynamic = "force-dynamic";
 export default async function AgendaPage() {
   await requireUser();
 
-  const [schedules, eventos] = await Promise.all([
+  const [schedules, eventos, campeonatos] = await Promise.all([
     prisma.classSchedule.findMany({
       where: { active: true },
       orderBy: [{ weekday: "asc" }, { startTime: "asc" }],
@@ -22,6 +30,11 @@ export default async function AgendaPage() {
     prisma.event.findMany({
       where: { startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
+    }),
+    prisma.competition.findMany({
+      where: { date: { gte: new Date() } },
+      orderBy: { date: "asc" },
+      take: 3,
     }),
   ]);
 
@@ -45,6 +58,74 @@ export default async function AgendaPage() {
           Horários fixos da semana e os próximos eventos da equipe.
         </p>
       </div>
+
+      {/* Campeonatos */}
+      <section>
+        <SectionTitle
+          action={
+            <Link
+              href="/app/campeonatos"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800"
+            >
+              Meus resultados
+              <ChevronRight aria-hidden className="size-3.5" />
+            </Link>
+          }
+        >
+          Campeonatos
+        </SectionTitle>
+
+        {campeonatos.length === 0 ? (
+          <Card>
+            <CardBody className="pt-4">
+              <p className="text-sm text-ink-500">
+                Nenhum campeonato marcado no momento.{" "}
+                <Link
+                  href="/app/campeonatos"
+                  className="font-semibold text-brand-700 hover:underline"
+                >
+                  Ver seus resultados anteriores
+                </Link>
+                .
+              </p>
+            </CardBody>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {campeonatos.map((c) => (
+              <Card key={c.id}>
+                <Link href="/app/campeonatos" className="block">
+                  <CardBody className="pt-4">
+                    <Badge tone="warning">
+                      <Trophy aria-hidden className="size-3" />
+                      {modalityLabel(c.modality)}
+                    </Badge>
+                    <h3 className="mt-2 font-display text-lg leading-tight font-bold tracking-wide uppercase">
+                      {c.name}
+                    </h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-brand-700 first-letter:uppercase">
+                      <CalendarDays aria-hidden className="size-4 shrink-0" />
+                      {formatDateLong(c.date)}
+                    </p>
+                    {c.location && (
+                      <p className="mt-0.5 flex items-center gap-1.5 text-sm text-ink-500">
+                        <MapPin aria-hidden className="size-4 shrink-0" />
+                        {c.location}
+                      </p>
+                    )}
+                    {c.registrationDeadline && (
+                      <p className="mt-2 inline-flex rounded-[6px] bg-warning/10 px-2.5 py-1 text-xs font-semibold text-warning">
+                        Inscrições até{" "}
+                        {formatDateShortYear(c.registrationDeadline)}
+                      </p>
+                    )}
+                  </CardBody>
+                </Link>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Eventos */}
       <section>
