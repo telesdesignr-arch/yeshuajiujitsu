@@ -20,6 +20,7 @@ import {
   graduationLabel,
   nextStep,
 } from "@/lib/belts";
+import { hojeISO } from "@/lib/dates";
 
 function Enviar({
   label,
@@ -125,8 +126,8 @@ export function GraduacaoForm({
           id="grad-date"
           name="date"
           type="date"
-          defaultValue={new Date().toISOString().slice(0, 10)}
-          max={new Date().toISOString().slice(0, 10)}
+          defaultValue={hojeISO()}
+          max={hojeISO()}
           required
         />
       </Field>

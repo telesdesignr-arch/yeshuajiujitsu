@@ -34,7 +34,13 @@ import {
 import { Avatar, Badge, EmptyState, Progress, Stat } from "@/components/ui/misc";
 import { graduationLabel, nextStep } from "@/lib/belts";
 import { requireStaff } from "@/lib/auth";
-import { dayKey, formatDateLong, formatDateShortYear, humanDuration } from "@/lib/dates";
+import {
+  agora,
+  dayKey,
+  formatDateLong,
+  formatDateShortYear,
+  humanDuration,
+} from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { getStudentStats } from "@/lib/stats";
 import { firstName, pluralize } from "@/lib/utils";
@@ -85,7 +91,7 @@ export default async function AlunoPage({
 
   const stats = await getStudentStats(student);
   const proximo = nextStep(student.belt, student.degree);
-  const mesAtual = startOfMonth(new Date());
+  const mesAtual = startOfMonth(agora());
 
   const aulasDoMes = await prisma.attendanceSession.findMany({
     where: { date: { gte: mesAtual } },

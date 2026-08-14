@@ -5,7 +5,7 @@ import { EventTypeBadge, classType } from "@/components/event-type";
 import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState } from "@/components/ui/misc";
 import { requireUser } from "@/lib/auth";
-import { WEEKDAYS, formatDateLong } from "@/lib/dates";
+import { WEEKDAYS, agora, formatDateLong, formatTime } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Agenda" };
@@ -25,7 +25,7 @@ export default async function AgendaPage() {
     }),
   ]);
 
-  const hoje = new Date().getDay();
+  const hoje = agora().getDay();
   const ordemDias = [1, 2, 3, 4, 5, 6, 0];
   const grade = ordemDias
     .map((weekday) => ({
@@ -71,10 +71,7 @@ export default async function AgendaPage() {
                   </p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-sm text-ink-500">
                     <Clock aria-hidden className="size-4 shrink-0" />
-                    {evento.startsAt.toLocaleTimeString("pt-BR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatTime(evento.startsAt)}
                   </p>
                   {evento.location && (
                     <p className="mt-0.5 flex items-center gap-1.5 text-sm text-ink-500">

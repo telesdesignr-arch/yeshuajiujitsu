@@ -1,6 +1,6 @@
 import { eachDayOfInterval, endOfMonth, getDay, startOfMonth } from "date-fns";
 
-import { dayKey, WEEKDAYS_SHORT } from "@/lib/dates";
+import { dayKey, hojeISO, naAcademia, WEEKDAYS_SHORT } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,11 +22,13 @@ export function AttendanceCalendar({
   className?: string;
 }) {
   const faltou = subject === "Você" ? "você não treinou" : `${subject} não treinou`;
-  const first = startOfMonth(month);
-  const last = endOfMonth(month);
+  // Todo o calendario e montado no fuso da academia: sem isso, depois das 21h
+  // o servidor (que roda em UTC) marcaria o dia seguinte como "hoje".
+  const first = startOfMonth(naAcademia(month));
+  const last = endOfMonth(naAcademia(month));
   const days = eachDayOfInterval({ start: first, end: last });
   const leading = getDay(first); // quantas casas vazias antes do dia 1
-  const today = dayKey(new Date());
+  const today = hojeISO();
 
   return (
     <div className={className}>

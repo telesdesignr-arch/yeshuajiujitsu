@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { hashPassword, requireStaff } from "@/lib/auth";
 import { BELT_KEYS, MAX_DEGREE } from "@/lib/belts";
+import { dataBrasileira, naAcademia } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
 export type ActionState = { error?: string; success?: string };
@@ -60,9 +61,9 @@ export async function createStudent(
     return { error: "Já existe alguém cadastrado com esse e-mail." };
   }
 
-  const joinedAt = new Date(`${data.joinedAt}T12:00:00`);
+  const joinedAt = dataBrasileira(data.joinedAt);
   const beltSinceAt = data.beltSinceAt
-    ? new Date(`${data.beltSinceAt}T12:00:00`)
+    ? dataBrasileira(data.beltSinceAt)
     : joinedAt;
 
   let novoId = "";
@@ -209,8 +210,8 @@ export async function saveAttendance(
   });
   if (!schedule) return { error: "Aula não encontrada na grade." };
 
-  const dataAula = new Date(`${date}T${schedule.startTime}:00`);
-  if (dataAula.getDay() !== schedule.weekday) {
+  const dataAula = dataBrasileira(date, schedule.startTime);
+  if (naAcademia(dataAula).getDay() !== schedule.weekday) {
     return {
       error:
         "A data escolhida não bate com o dia da semana dessa aula. Confira a data.",
@@ -218,8 +219,8 @@ export async function saveAttendance(
   }
 
   // Uma chamada por aula por dia: se já existe, atualizamos.
-  const inicioDoDia = new Date(`${date}T00:00:00`);
-  const fimDoDia = new Date(`${date}T23:59:59`);
+  const inicioDoDia = dataBrasileira(date, "00:00");
+  const fimDoDia = dataBrasileira(date, "23:59");
 
   const existente = await prisma.attendanceSession.findFirst({
     where: { scheduleId, date: { gte: inicioDoDia, lte: fimDoDia } },
@@ -298,7 +299,7 @@ export async function addGraduation(
 
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
-  const dataGraduacao = new Date(`${d.date}T12:00:00`);
+  const dataGraduacao = dataBrasileira(d.date);
 
   await prisma.$transaction([
     prisma.graduation.create({
@@ -410,7 +411,7 @@ export async function createEvent(
     data: {
       title: d.title,
       type: d.type,
-      startsAt: new Date(`${d.startsAt}T${d.time || "19:00"}:00`),
+      startsAt: dataBrasileira(d.startsAt, d.time || "19:00"),
       location: d.location || null,
       description: d.description || null,
       link: d.link || null,

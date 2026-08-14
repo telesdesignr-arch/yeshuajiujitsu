@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/field";
 import { BELTS, MAX_DEGREE } from "@/lib/belts";
+import { hojeISO } from "@/lib/dates";
 
 function Salvar() {
   const { pending } = useFormStatus();
@@ -34,7 +35,7 @@ export function AlunoForm() {
     createStudent,
     {},
   );
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
 
   return (
     <form action={formAction} className="space-y-4" noValidate>

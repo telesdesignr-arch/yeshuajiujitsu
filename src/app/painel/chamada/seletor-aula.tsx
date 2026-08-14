@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 
 import { Field, Select } from "@/components/ui/field";
 import { Input } from "@/components/ui/field";
+import { hojeISO } from "@/lib/dates";
 
 /**
  * Escolha da data e da aula. Ao mudar qualquer um dos dois recarregamos a
@@ -39,7 +40,7 @@ export function SeletorAula({
           id="data"
           type="date"
           value={date}
-          max={new Date().toISOString().slice(0, 10)}
+          max={hojeISO()}
           onChange={(e) => atualizar("data", e.target.value)}
         />
       </Field>

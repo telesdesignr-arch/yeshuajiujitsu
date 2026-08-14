@@ -11,7 +11,7 @@ import {
 } from "date-fns";
 
 import { prisma } from "@/lib/prisma";
-import { dayKey, formatMonthYear, monthsSince } from "@/lib/dates";
+import { agora, dayKey, formatMonthYear, monthsSince, naAcademia } from "@/lib/dates";
 import { nextStep } from "@/lib/belts";
 
 /**
@@ -68,7 +68,7 @@ const MONTH_SHORT = [
 const WEEK_OPTIONS = { weekStartsOn: 1 as const }; // semana comeca na segunda
 
 function weekKey(date: Date) {
-  return format(startOfWeek(date, WEEK_OPTIONS), "yyyy-MM-dd");
+  return format(startOfWeek(naAcademia(date), WEEK_OPTIONS), "yyyy-MM-dd");
 }
 
 /**
@@ -85,7 +85,7 @@ function weekKey(date: Date) {
  */
 export function computeWeekStreak(
   attendedDates: Date[],
-  today = new Date(),
+  today: Date = agora(),
 ): number {
   const weeks = new Set(attendedDates.map(weekKey));
   let streak = 0;
@@ -110,7 +110,7 @@ export async function getStudentStats(student: {
   degree: number;
   beltSinceAt: Date;
 }): Promise<StudentStats> {
-  const now = new Date();
+  const now = agora();
   const historyStart = startOfMonth(subMonths(now, 5));
   const from = student.joinedAt < historyStart ? historyStart : student.joinedAt;
 
@@ -200,7 +200,7 @@ export async function getStudentsSummary(
   const ids = students.map((s) => s.id);
   if (ids.length === 0) return new Map();
 
-  const now = new Date();
+  const now = agora();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
 
@@ -270,7 +270,7 @@ export type AcademyOverview = {
 };
 
 export async function getAcademyOverview(): Promise<AcademyOverview> {
-  const now = new Date();
+  const now = agora();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
 
@@ -383,7 +383,7 @@ export async function getGraduationCandidates(): Promise<GraduationCandidate[]> 
 
   // Para decidir graduação olhamos os últimos 3 meses fechados, e não o mês
   // corrente: no dia 5 do mês todo mundo pareceria relapso.
-  const now = new Date();
+  const now = agora();
   const inicioJanela = startOfMonth(subMonths(now, 3));
   const fimJanela = endOfMonth(subMonths(now, 1));
 

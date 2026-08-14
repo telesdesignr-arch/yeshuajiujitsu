@@ -6,17 +6,11 @@ import { SeletorAula } from "./seletor-aula";
 import { Card, CardBody } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/misc";
 import { requireStaff } from "@/lib/auth";
-import { WEEKDAYS } from "@/lib/dates";
+import { WEEKDAYS, dataBrasileira, hojeISO, naAcademia } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Chamada" };
 export const dynamic = "force-dynamic";
-
-function hojeISO() {
-  const d = new Date();
-  const off = d.getTimezoneOffset();
-  return new Date(d.getTime() - off * 60_000).toISOString().slice(0, 10);
-}
 
 export default async function ChamadaPage({
   searchParams,
@@ -29,7 +23,7 @@ export default async function ChamadaPage({
   const date = /^\d{4}-\d{2}-\d{2}$/.test(params.data ?? "")
     ? params.data!
     : hojeISO();
-  const weekday = new Date(`${date}T12:00:00`).getDay();
+  const weekday = naAcademia(dataBrasileira(date)).getDay();
 
   const aulasDoDia = await prisma.classSchedule.findMany({
     where: { weekday, active: true },
@@ -50,8 +44,8 @@ export default async function ChamadaPage({
           where: {
             scheduleId,
             date: {
-              gte: new Date(`${date}T00:00:00`),
-              lte: new Date(`${date}T23:59:59`),
+              gte: dataBrasileira(date, "00:00"),
+              lte: dataBrasileira(date, "23:59"),
             },
           },
           include: { attendances: { where: { present: true } } },

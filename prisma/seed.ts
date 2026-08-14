@@ -36,11 +36,12 @@ function addMonths(date: Date, months: number) {
   return d;
 }
 
+// Monta o instante de uma aula sempre em horario de Brasilia, para os dados
+// de exemplo nascerem no mesmo fuso que o sistema usa em producao.
 function atHour(date: Date, time: string) {
-  const [h, m] = time.split(":").map(Number);
-  const d = new Date(date);
-  d.setHours(h, m, 0, 0);
-  return d;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const dia = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return new Date(`${dia}T${time}:00-03:00`);
 }
 
 const SENHA_PADRAO = "yeshua123";

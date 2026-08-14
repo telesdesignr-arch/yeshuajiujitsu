@@ -8,7 +8,14 @@ import { BarChart } from "@/components/charts";
 import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState, Progress } from "@/components/ui/misc";
 import { requireStudent } from "@/lib/auth";
-import { dayKey, formatMonthYear, formatWeekdayShort } from "@/lib/dates";
+import {
+  agora,
+  dayKey,
+  diaDoMes,
+  formatMonthYear,
+  formatWeekdayShort,
+  naAcademia,
+} from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { getStudentStats } from "@/lib/stats";
 import { pluralize } from "@/lib/utils";
@@ -18,11 +25,10 @@ export const dynamic = "force-dynamic";
 
 function parseMonth(value: string | undefined): Date {
   if (value && /^\d{4}-\d{2}$/.test(value)) {
-    const [y, m] = value.split("-").map(Number);
-    const d = new Date(y, m - 1, 1);
-    if (!Number.isNaN(d.getTime())) return d;
+    const d = naAcademia(`${value}-01T12:00:00-03:00`);
+    if (!Number.isNaN(d.getTime())) return startOfMonth(d);
   }
-  return startOfMonth(new Date());
+  return startOfMonth(agora());
 }
 
 function monthParam(date: Date) {
@@ -40,7 +46,7 @@ export default async function TreinosPage({
   const mesAtual = parseMonth(mes);
   const inicio = startOfMonth(mesAtual);
   const fim = endOfMonth(mesAtual);
-  const podeAvancar = !isAfter(addMonths(inicio, 1), startOfMonth(new Date()));
+  const podeAvancar = !isAfter(addMonths(inicio, 1), startOfMonth(agora()));
 
   const [stats, presencas, aulasDoMes] = await Promise.all([
     getStudentStats(student),
@@ -175,7 +181,7 @@ export default async function TreinosPage({
                 >
                   <span className="flex size-11 shrink-0 flex-col items-center justify-center rounded-[10px] bg-brand-50 leading-none text-brand-800">
                     <span className="tabular text-base font-bold">
-                      {registro.session.date.getDate()}
+                      {diaDoMes(registro.session.date)}
                     </span>
                     <span className="mt-0.5 text-[10px] font-semibold uppercase">
                       {formatWeekdayShort(registro.session.date)}
