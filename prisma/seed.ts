@@ -242,11 +242,18 @@ function conferirBanco() {
 async function main() {
   conferirBanco();
 
+  // A ordem importa: primeiro o que aponta para os outros.
+  //
+  // ATENCAO ao criar tabela nova: se ela nao entrar nesta lista, o seed passa
+  // a DUPLICAR os registros dela a cada execucao, em vez de recriar. Foi o que
+  // aconteceu com os campeonatos quando a tabela foi criada.
   console.log("Limpando dados antigos...");
   await prisma.attendance.deleteMany();
   await prisma.attendanceSession.deleteMany();
   await prisma.studentNote.deleteMany();
   await prisma.graduation.deleteMany();
+  await prisma.competitionResult.deleteMany();
+  await prisma.competition.deleteMany();
   await prisma.student.deleteMany();
   await prisma.classSchedule.deleteMany();
   await prisma.event.deleteMany();
@@ -482,6 +489,8 @@ async function main() {
       location: "Tijuca Tênis Clube — Rio de Janeiro",
       organizer: "FJJRIO",
       modality: "GI",
+      imageUrl:
+        "https://www.fjjrio.app.br/app/img/eventos/Rei%20do%20Riof66cdbf1d24b3f69bc68e11fbb1142af553f5122.jpeg",
       description:
         "Etapa estadual com chaves do infantil ao master. A equipe levou nove atletas.",
     },
@@ -494,6 +503,8 @@ async function main() {
       location: "CEFAN — Rio de Janeiro",
       organizer: "CBJJD",
       modality: "NOGI",
+      imageUrl:
+        "https://www.fjjrio.app.br/app/img/eventos/Rolls%20Gracie2b1f15f7e10f3ef3dc39872ac5c8faa3aae62c9a.jpeg",
       description: "Primeira competição sem kimono da equipe no ano.",
     },
   });
