@@ -104,6 +104,46 @@ export function Collapsible({
   );
 }
 
+/**
+ * Abre e fecha um trecho dentro de um cartao que ja existe, sem virar outro
+ * cartao. Usado para editar um item na propria lista.
+ *
+ * Tambem e <details> nativo: sem estado no React, e o formulario de dentro so
+ * e montado quando o professor abre.
+ */
+export function Disclosure({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <details className={cn("group/dis", className)}>
+      <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-ink-500 transition-smooth hover:text-ink [&::-webkit-details-marker]:hidden">
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          className="size-4 transition-transform duration-200 group-open/dis:rotate-180"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+        {label}
+      </summary>
+      <div className="mt-3 rounded-[10px] border border-line bg-ink-100/50 p-4">
+        {children}
+      </div>
+    </details>
+  );
+}
+
 /** Cabecalho de secao usado dentro das paginas (fora de cartoes). */
 export function SectionTitle({
   children,

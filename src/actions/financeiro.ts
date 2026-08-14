@@ -23,12 +23,14 @@ function revalidarFinanceiro(studentId?: string) {
 /* Planos                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export async function createPlan(
+/** Cria o plano ou salva por cima, quando vem com id. */
+export async function savePlan(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   await requireStaff();
 
+  const planId = String(formData.get("planId") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const precoTexto = String(formData.get("price") ?? "");
   const description = String(formData.get("description") ?? "").trim();
@@ -41,6 +43,27 @@ export async function createPlan(
   }
   if (priceCents === 0) {
     return { error: "O valor do plano não pode ser zero." };
+  }
+
+  if (planId) {
+    const plano = await prisma.plan.findUnique({
+      where: { id: planId },
+      select: { id: true },
+    });
+    if (!plano) return { error: "Plano não encontrado." };
+
+    // Mudar o valor do plano vale daqui para a frente. As mensalidades que já
+    // foram geradas guardam o próprio valor, então o histórico e o que o aluno
+    // já pagou não mudam retroativamente.
+    await prisma.plan.update({
+      where: { id: planId },
+      data: { name, priceCents, description: description || null },
+    });
+
+    revalidarFinanceiro();
+    return {
+      success: `Plano "${name}" atualizado. O novo valor vale para as próximas mensalidades.`,
+    };
   }
 
   const quantos = await prisma.plan.count();

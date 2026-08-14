@@ -565,6 +565,8 @@ export async function deleteNote(formData: FormData) {
 /* -------------------------------------------------------------------------- */
 
 const eventoSchema = z.object({
+  /** vazio quando e um cadastro novo; preenchido quando esta editando */
+  eventId: z.string().trim().optional(),
   title: z.string().trim().min(3, "Dê um nome ao evento."),
   type: z.string().min(1),
   startsAt: z.string().min(1, "Informe a data do evento."),
@@ -574,13 +576,15 @@ const eventoSchema = z.object({
   link: z.string().trim().optional(),
 });
 
-export async function createEvent(
+/** Cria o evento ou salva por cima, quando vem com id. */
+export async function saveEvent(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   await requireStaff();
 
   const parsed = eventoSchema.safeParse({
+    eventId: formData.get("eventId"),
     title: formData.get("title"),
     type: formData.get("type"),
     startsAt: formData.get("startsAt"),
@@ -593,22 +597,38 @@ export async function createEvent(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
 
-  await prisma.event.create({
-    data: {
-      title: d.title,
-      type: d.type,
-      startsAt: dataBrasileira(d.startsAt, d.time || "19:00"),
-      location: d.location || null,
-      description: d.description || null,
-      link: d.link || null,
-    },
-  });
+  const dados = {
+    title: d.title,
+    type: d.type,
+    startsAt: dataBrasileira(d.startsAt, d.time || "19:00"),
+    location: d.location || null,
+    description: d.description || null,
+    link: d.link || null,
+  };
 
+  if (d.eventId) {
+    const existe = await prisma.event.findUnique({
+      where: { id: d.eventId },
+      select: { id: true },
+    });
+    if (!existe) return { error: "Evento não encontrado." };
+
+    await prisma.event.update({ where: { id: d.eventId }, data: dados });
+    revalidateAgenda();
+    return { success: "Evento atualizado." };
+  }
+
+  await prisma.event.create({ data: dados });
+
+  revalidateAgenda();
+  return { success: "Evento publicado na agenda." };
+}
+
+function revalidateAgenda() {
   revalidatePath("/painel/agenda");
   revalidatePath("/app/agenda");
+  revalidatePath("/app");
   revalidatePath("/");
-
-  return { success: "Evento publicado na agenda." };
 }
 
 export async function deleteEvent(formData: FormData) {
@@ -617,43 +637,66 @@ export async function deleteEvent(formData: FormData) {
   if (!id) return;
 
   await prisma.event.delete({ where: { id } });
-  revalidatePath("/painel/agenda");
-  revalidatePath("/app/agenda");
-  revalidatePath("/");
+  revalidateAgenda();
 }
 
 const horarioSchema = z.object({
+  /** vazio quando e um cadastro novo; preenchido quando esta editando */
+  scheduleId: z.string().trim().optional(),
   weekday: z.coerce.number().int().min(0).max(6),
   startTime: z.string().regex(/^\d{2}:\d{2}$/, "Use o formato 19:00."),
   endTime: z.string().regex(/^\d{2}:\d{2}$/, "Use o formato 20:30."),
   title: z.string().trim().min(2, "Dê um nome à aula."),
+  modality: z.enum(["JIU_JITSU", "BOXE"]),
   type: z.string().min(1),
 });
 
-export async function createSchedule(
+/** Cria o horario ou salva por cima, quando vem com id. */
+export async function saveSchedule(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const staff = await requireStaff();
 
   const parsed = horarioSchema.safeParse({
+    scheduleId: formData.get("scheduleId"),
     weekday: formData.get("weekday"),
     startTime: formData.get("startTime"),
     endTime: formData.get("endTime"),
     title: formData.get("title"),
+    modality: formData.get("modality"),
     type: formData.get("type"),
   });
 
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { scheduleId, ...dados } = parsed.data;
+
+  if (dados.endTime <= dados.startTime) {
+    return { error: "A aula precisa terminar depois de começar." };
+  }
+
+  if (scheduleId) {
+    const existe = await prisma.classSchedule.findUnique({
+      where: { id: scheduleId },
+      select: { id: true },
+    });
+    if (!existe) return { error: "Horário não encontrado." };
+
+    // As chamadas ja feitas nao mudam: elas guardam o proprio titulo e a
+    // propria modalidade, entao o historico continua contando o que de fato
+    // aconteceu naquele dia.
+    await prisma.classSchedule.update({ where: { id: scheduleId }, data: dados });
+    revalidateAgenda();
+    revalidatePath("/painel/chamada");
+    return { success: "Horário atualizado." };
+  }
 
   await prisma.classSchedule.create({
-    data: { ...parsed.data, professorId: staff.userId },
+    data: { ...dados, professorId: staff.userId },
   });
 
-  revalidatePath("/painel/agenda");
-  revalidatePath("/app/agenda");
-  revalidatePath("/");
-
+  revalidateAgenda();
+  revalidatePath("/painel/chamada");
   return { success: "Horário adicionado à grade." };
 }
 
@@ -668,7 +711,6 @@ export async function deleteSchedule(formData: FormData) {
     data: { active: false },
   });
 
-  revalidatePath("/painel/agenda");
-  revalidatePath("/app/agenda");
-  revalidatePath("/");
+  revalidateAgenda();
+  revalidatePath("/painel/chamada");
 }

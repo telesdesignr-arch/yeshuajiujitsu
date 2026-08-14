@@ -14,6 +14,8 @@ export type ActionState = { error?: string; success?: string };
 /* -------------------------------------------------------------------------- */
 
 const campeonatoSchema = z.object({
+  /** vazio quando e um cadastro novo; preenchido quando esta editando */
+  competitionId: z.string().trim().optional(),
   name: z.string().trim().min(3, "Dê o nome do campeonato."),
   date: z.string().min(1, "Informe a data do campeonato."),
   time: z.string().optional(),
@@ -27,13 +29,21 @@ const campeonatoSchema = z.object({
   imageUrl: z.string().trim().optional(),
 });
 
-export async function createCompetition(
+/**
+ * Cadastra um campeonato novo ou salva as alteracoes de um que ja existe.
+ *
+ * E a mesma funcao para os dois casos de proposito: as regras de validacao
+ * (prazo antes da data, imagem em https) valem igual no cadastro e na edicao,
+ * e duplicar isso em duas funcoes so criaria a chance de uma ficar para tras.
+ */
+export async function saveCompetition(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   await requireStaff();
 
   const parsed = campeonatoSchema.safeParse({
+    competitionId: formData.get("competitionId"),
     name: formData.get("name"),
     date: formData.get("date"),
     time: formData.get("time"),
@@ -68,22 +78,38 @@ export async function createCompetition(
     return { error: "A data de encerramento não pode ser antes da de início." };
   }
 
-  await prisma.competition.create({
-    data: {
-      name: d.name,
-      date: dataBrasileira(d.date, d.time || "08:00"),
-      endDate: d.endDate ? dataBrasileira(d.endDate, "18:00") : null,
-      location: d.location || null,
-      organizer: d.organizer || null,
-      modality: d.modality,
-      registrationUrl: d.registrationUrl || null,
-      registrationDeadline: d.registrationDeadline
-        ? dataBrasileira(d.registrationDeadline, "23:59")
-        : null,
-      description: d.description || null,
-      imageUrl: d.imageUrl || null,
-    },
-  });
+  const dados = {
+    name: d.name,
+    date: dataBrasileira(d.date, d.time || "08:00"),
+    endDate: d.endDate ? dataBrasileira(d.endDate, "18:00") : null,
+    location: d.location || null,
+    organizer: d.organizer || null,
+    modality: d.modality,
+    registrationUrl: d.registrationUrl || null,
+    registrationDeadline: d.registrationDeadline
+      ? dataBrasileira(d.registrationDeadline, "23:59")
+      : null,
+    description: d.description || null,
+    imageUrl: d.imageUrl || null,
+  };
+
+  if (d.competitionId) {
+    const existe = await prisma.competition.findUnique({
+      where: { id: d.competitionId },
+      select: { id: true },
+    });
+    if (!existe) return { error: "Campeonato não encontrado." };
+
+    await prisma.competition.update({
+      where: { id: d.competitionId },
+      data: dados,
+    });
+    revalidateCampeonatos();
+    revalidatePath(`/painel/campeonatos/${d.competitionId}`);
+    return { success: "Campeonato atualizado." };
+  }
+
+  await prisma.competition.create({ data: dados });
 
   revalidateCampeonatos();
   return { success: "Campeonato publicado. Já aparece para os alunos." };

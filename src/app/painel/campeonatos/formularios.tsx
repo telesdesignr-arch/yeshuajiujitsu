@@ -2,11 +2,11 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Loader2, Medal as MedalIcon, Trophy } from "lucide-react";
+import { Loader2, Medal as MedalIcon, Save, Trophy } from "lucide-react";
 
 import {
   addResult,
-  createCompetition,
+  saveCompetition,
   type ActionState,
 } from "@/actions/campeonatos";
 import { BeltChip } from "@/components/belt";
@@ -45,45 +45,103 @@ function Enviar({
 /* Novo campeonato                                                             */
 /* -------------------------------------------------------------------------- */
 
-export function CampeonatoForm() {
+/** Valores que ja estao salvos, quando o professor esta editando. */
+export type CampeonatoSalvo = {
+  id: string;
+  name: string;
+  /** "2026-10-14" */
+  date: string;
+  /** "08:00" */
+  time: string;
+  endDate: string;
+  location: string;
+  organizer: string;
+  modality: string;
+  registrationUrl: string;
+  registrationDeadline: string;
+  description: string;
+  imageUrl: string;
+};
+
+/**
+ * Serve para cadastrar e para editar. Quando recebe `campeonato`, os campos ja
+ * vem preenchidos e um campo escondido leva o id junto, o que faz a action
+ * salvar por cima em vez de criar outro.
+ */
+export function CampeonatoForm({
+  campeonato,
+}: {
+  campeonato?: CampeonatoSalvo;
+}) {
   const [state, formAction] = useActionState<ActionState, FormData>(
-    createCompetition,
+    saveCompetition,
     {},
   );
 
+  const editando = Boolean(campeonato);
+  // Prefixo dos ids: no modo edicao os dois formularios podem existir na mesma
+  // pagina, e ids repetidos quebrariam o clique no rotulo do campo.
+  const p = editando ? "ed-cp" : "cp";
+
   return (
     <form action={formAction} className="space-y-4" noValidate>
+      {campeonato && (
+        <input type="hidden" name="competitionId" value={campeonato.id} />
+      )}
+
       {state.error && <FormAlert>{state.error}</FormAlert>}
       {state.success && <FormAlert tone="success">{state.success}</FormAlert>}
 
-      <Field label="Nome do campeonato" htmlFor="cp-name" required>
+      <Field label="Nome do campeonato" htmlFor={`${p}-name`} required>
         <Input
-          id="cp-name"
+          id={`${p}-name`}
           name="name"
+          defaultValue={campeonato?.name}
           placeholder="Ex.: Copa Rio de Jiu-Jitsu 2026"
           required
         />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Data" htmlFor="cp-date" required>
-          <Input id="cp-date" name="date" type="date" required />
+        <Field label="Data" htmlFor={`${p}-date`} required>
+          <Input
+            id={`${p}-date`}
+            name="date"
+            type="date"
+            defaultValue={campeonato?.date}
+            required
+          />
         </Field>
-        <Field label="Horário de início" htmlFor="cp-time">
-          <Input id="cp-time" name="time" type="time" defaultValue="08:00" />
+        <Field label="Horário de início" htmlFor={`${p}-time`}>
+          <Input
+            id={`${p}-time`}
+            name="time"
+            type="time"
+            defaultValue={campeonato?.time ?? "08:00"}
+          />
         </Field>
       </div>
 
       <Field
         label="Termina em"
-        htmlFor="cp-end"
+        htmlFor={`${p}-end`}
         hint="Só para campeonatos de mais de um dia."
       >
-        <Input id="cp-end" name="endDate" type="date" />
+        <Input
+          id={`${p}-end`}
+          name="endDate"
+          type="date"
+          defaultValue={campeonato?.endDate}
+        />
       </Field>
 
-      <Field label="Modalidade" htmlFor="cp-mod" required>
-        <Select id="cp-mod" name="modality" defaultValue="GI" required>
+      <Field label="Modalidade" htmlFor={`${p}-mod`} required>
+        <Select
+          id={`${p}-mod`}
+          name="modality"
+          defaultValue={campeonato?.modality ?? "GI"}
+          required
+        >
           {Object.entries(MODALITIES).map(([key, m]) => (
             <option key={key} value={key}>
               {m.label}
@@ -92,27 +150,42 @@ export function CampeonatoForm() {
         </Select>
       </Field>
 
-      <Field label="Local" htmlFor="cp-local">
+      <Field label="Local" htmlFor={`${p}-local`}>
         <Input
-          id="cp-local"
+          id={`${p}-local`}
           name="location"
+          defaultValue={campeonato?.location}
           placeholder="Ex.: Tijuca Tênis Clube, Rio de Janeiro"
         />
       </Field>
 
-      <Field label="Organização" htmlFor="cp-org" hint="IBJJF, CBJJ, federação...">
-        <Input id="cp-org" name="organizer" />
+      <Field
+        label="Organização"
+        htmlFor={`${p}-org`}
+        hint="IBJJF, CBJJ, federação..."
+      >
+        <Input
+          id={`${p}-org`}
+          name="organizer"
+          defaultValue={campeonato?.organizer}
+        />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Inscrições até" htmlFor="cp-prazo">
-          <Input id="cp-prazo" name="registrationDeadline" type="date" />
-        </Field>
-        <Field label="Link de inscrição" htmlFor="cp-link">
+        <Field label="Inscrições até" htmlFor={`${p}-prazo`}>
           <Input
-            id="cp-link"
+            id={`${p}-prazo`}
+            name="registrationDeadline"
+            type="date"
+            defaultValue={campeonato?.registrationDeadline}
+          />
+        </Field>
+        <Field label="Link de inscrição" htmlFor={`${p}-link`}>
+          <Input
+            id={`${p}-link`}
             name="registrationUrl"
             type="url"
+            defaultValue={campeonato?.registrationUrl}
             placeholder="https://"
           />
         </Field>
@@ -120,29 +193,35 @@ export function CampeonatoForm() {
 
       <Field
         label="Imagem do campeonato"
-        htmlFor="cp-img"
-        hint="No site da federação, clique com o botão direito no cartaz do campeonato e escolha “Copiar endereço da imagem”. Cole aqui."
+        htmlFor={`${p}-img`}
+        hint='No site da federação, clique com o botão direito no cartaz do campeonato e escolha "Copiar endereço da imagem". Cole aqui.'
       >
         <Input
-          id="cp-img"
+          id={`${p}-img`}
           name="imageUrl"
           type="url"
+          defaultValue={campeonato?.imageUrl}
           placeholder="https://..."
         />
       </Field>
 
       <Field
         label="Informações"
-        htmlFor="cp-desc"
+        htmlFor={`${p}-desc`}
         hint="Categorias, pesagem, o que levar, horário de chegada."
       >
-        <Textarea id="cp-desc" name="description" rows={3} />
+        <Textarea
+          id={`${p}-desc`}
+          name="description"
+          rows={3}
+          defaultValue={campeonato?.description}
+        />
       </Field>
 
       <Enviar
-        label="Publicar campeonato"
-        loading="Publicando..."
-        icon={Trophy}
+        label={editando ? "Salvar alterações" : "Publicar campeonato"}
+        loading="Salvando..."
+        icon={editando ? Save : Trophy}
       />
     </form>
   );

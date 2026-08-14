@@ -29,6 +29,7 @@ import {
   CardHeader,
   CardTitle,
   Collapsible,
+  Disclosure,
   SectionTitle,
 } from "@/components/ui/card";
 import { Avatar, Badge, EmptyState, Stat } from "@/components/ui/misc";
@@ -43,7 +44,7 @@ import {
   situacao,
   valorDoAluno,
 } from "@/lib/finance";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, formatMoneyInput } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Financeiro" };
@@ -329,30 +330,43 @@ export default async function FinanceiroPage({
           <ul>
             {planos.map((p, i) => (
               <li key={p.id} className={i > 0 ? "border-t border-line" : ""}>
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 font-semibold">
-                      {p.name}
-                      {!p.active && <Badge tone="neutral">Inativo</Badge>}
+                <div className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="flex items-center gap-2 font-semibold">
+                        {p.name}
+                        {!p.active && <Badge tone="neutral">Inativo</Badge>}
+                      </p>
+                      {p.description && (
+                        <p className="text-sm text-ink-500">{p.description}</p>
+                      )}
+                    </div>
+                    <p className="tabular shrink-0 font-display text-lg font-bold">
+                      {formatMoney(p.priceCents)}
                     </p>
-                    {p.description && (
-                      <p className="text-sm text-ink-500">{p.description}</p>
-                    )}
+                    <form action={togglePlan} className="shrink-0">
+                      <input type="hidden" name="planId" value={p.id} />
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        size="sm"
+                        className="text-ink-500"
+                      >
+                        {p.active ? "Desativar" : "Reativar"}
+                      </Button>
+                    </form>
                   </div>
-                  <p className="tabular shrink-0 font-display text-lg font-bold">
-                    {formatMoney(p.priceCents)}
-                  </p>
-                  <form action={togglePlan} className="shrink-0">
-                    <input type="hidden" name="planId" value={p.id} />
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="sm"
-                      className="text-ink-500"
-                    >
-                      {p.active ? "Desativar" : "Reativar"}
-                    </Button>
-                  </form>
+
+                  <Disclosure label="Editar plano" className="mt-2">
+                    <PlanoForm
+                      plano={{
+                        id: p.id,
+                        name: p.name,
+                        price: formatMoneyInput(p.priceCents),
+                        description: p.description ?? "",
+                      }}
+                    />
+                  </Disclosure>
                 </div>
               </li>
             ))}

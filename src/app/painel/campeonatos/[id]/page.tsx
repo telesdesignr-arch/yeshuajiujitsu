@@ -7,11 +7,12 @@ import {
   ExternalLink,
   MapPin,
   Medal as MedalIcon,
+  Pencil,
   Trash2,
   Trophy,
 } from "lucide-react";
 
-import { ResultadoForm } from "../formularios";
+import { CampeonatoForm, ResultadoForm } from "../formularios";
 import { deleteCompetition, deleteResult } from "@/actions/campeonatos";
 import { BeltChip } from "@/components/belt";
 import { CompetitionImage } from "@/components/competition-image";
@@ -30,7 +31,13 @@ import {
   placementInfo,
   tallyMedals,
 } from "@/lib/competitions";
-import { agora, formatDateLong, formatDateShortYear } from "@/lib/dates";
+import {
+  agora,
+  dayKey,
+  formatDateLong,
+  formatDateShortYear,
+  formatTime,
+} from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -197,6 +204,31 @@ export default async function CampeonatoPage({
           </CardBody>
         </Card>
       )}
+
+      <Collapsible
+        title="Editar campeonato"
+        description="Corrigir data, local, prazo de inscrição ou imagem"
+        icon={Pencil}
+      >
+        <CampeonatoForm
+          campeonato={{
+            id: campeonato.id,
+            name: campeonato.name,
+            date: dayKey(campeonato.date),
+            time: formatTime(campeonato.date),
+            endDate: campeonato.endDate ? dayKey(campeonato.endDate) : "",
+            location: campeonato.location ?? "",
+            organizer: campeonato.organizer ?? "",
+            modality: campeonato.modality,
+            registrationUrl: campeonato.registrationUrl ?? "",
+            registrationDeadline: campeonato.registrationDeadline
+              ? dayKey(campeonato.registrationDeadline)
+              : "",
+            description: campeonato.description ?? "",
+            imageUrl: campeonato.imageUrl ?? "",
+          }}
+        />
+      </Collapsible>
 
       <Collapsible
         title="Registrar resultado"

@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 import { Check, Loader2, Plus, Save, Wand2 } from "lucide-react";
 
 import {
-  createPlan,
+  savePlan,
   generateInvoices,
   markPaid,
   saveSettings,
@@ -48,24 +48,39 @@ function Enviar({
 /* Novo plano                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export function PlanoForm() {
+/** Valores que ja estao salvos, quando o professor esta editando. */
+export type PlanoSalvo = {
+  id: string;
+  name: string;
+  /** ja formatado, ex.: "150,00" */
+  price: string;
+  description: string;
+};
+
+/** Serve para criar e para editar: com `plano`, salva por cima. */
+export function PlanoForm({ plano }: { plano?: PlanoSalvo }) {
   const [state, formAction] = useActionState<ActionState, FormData>(
-    createPlan,
+    savePlan,
     {},
   );
-  const [preco, setPreco] = useState("");
+  const [preco, setPreco] = useState(plano?.price ?? "");
 
   const centavos = parseMoney(preco);
+  const editando = Boolean(plano);
+  const p = editando ? `ed-pl-${plano!.id}` : "pl";
 
   return (
     <form action={formAction} className="space-y-4" noValidate>
+      {plano && <input type="hidden" name="planId" value={plano.id} />}
+
       {state.error && <FormAlert>{state.error}</FormAlert>}
       {state.success && <FormAlert tone="success">{state.success}</FormAlert>}
 
-      <Field label="Nome do plano" htmlFor="pl-name" required>
+      <Field label="Nome do plano" htmlFor={`${p}-name`} required>
         <Input
-          id="pl-name"
+          id={`${p}-name`}
           name="name"
+          defaultValue={plano?.name}
           placeholder="Ex.: Adulto, 3x por semana"
           required
         />
@@ -73,7 +88,7 @@ export function PlanoForm() {
 
       <Field
         label="Valor da mensalidade"
-        htmlFor="pl-price"
+        htmlFor={`${p}-price`}
         required
         hint={
           centavos !== null && centavos > 0
@@ -82,7 +97,7 @@ export function PlanoForm() {
         }
       >
         <Input
-          id="pl-price"
+          id={`${p}-price`}
           name="price"
           inputMode="decimal"
           value={preco}
@@ -92,16 +107,28 @@ export function PlanoForm() {
         />
       </Field>
 
-      <Field label="Descrição" htmlFor="pl-desc">
+      <Field label="Descrição" htmlFor={`${p}-desc`}>
         <Textarea
-          id="pl-desc"
+          id={`${p}-desc`}
           name="description"
           rows={2}
+          defaultValue={plano?.description}
           placeholder="O que está incluso neste plano."
         />
       </Field>
 
-      <Enviar label="Criar plano" loading="Criando..." icon={Plus} />
+      {editando && (
+        <p className="text-xs text-ink-500">
+          Mudar o valor vale para as próximas mensalidades. As que já foram
+          geradas continuam com o valor de quando saíram.
+        </p>
+      )}
+
+      <Enviar
+        label={editando ? "Salvar alterações" : "Criar plano"}
+        loading="Salvando..."
+        icon={editando ? Save : Plus}
+      />
     </form>
   );
 }
