@@ -8,6 +8,7 @@ import {
   CalendarCheck,
   CheckCircle2,
   Flame,
+  KeyRound,
   MessageCircle,
   MessageSquarePlus,
   Pencil,
@@ -20,14 +21,16 @@ import {
 
 import {
   EditarAlunoForm,
+  EditarGraduacaoForm,
   FinanceiroAlunoForm,
   GraduacaoForm,
   NotaForm,
 } from "./formularios";
-import { deleteNote } from "@/actions/painel";
+import { deleteGraduation, deleteNote } from "@/actions/painel";
 import { AttendanceCalendar } from "@/components/attendance-calendar";
 import { BeltBar } from "@/components/belt";
 import { BarChart } from "@/components/charts";
+import { SenhaTemporaria } from "@/components/senha-temporaria";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -369,6 +372,23 @@ export default async function AlunoPage({
       </Collapsible>
 
       <Collapsible
+        title="Gerar senha nova"
+        description={
+          student.user.passwordResetRequestedAt
+            ? "O aluno pediu ajuda para entrar"
+            : "Para quando o aluno não conseguir entrar"
+        }
+        icon={KeyRound}
+        defaultOpen={Boolean(student.user.passwordResetRequestedAt)}
+      >
+        <p className="mb-3 text-sm text-ink-500">
+          A senha atual do aluno é apagada e uma temporária é criada. No
+          primeiro acesso ele é obrigado a criar uma senha só dele.
+        </p>
+        <SenhaTemporaria userId={student.userId} />
+      </Collapsible>
+
+      <Collapsible
         title="Editar dados"
         description="Nome, contato, meta e situação"
         icon={Pencil}
@@ -515,6 +535,40 @@ export default async function AlunoPage({
                     {g.notes && (
                       <p className="mt-2 text-sm text-ink-500">{g.notes}</p>
                     )}
+
+                    {/* Corrigir ou apagar. Fica recolhido para nao virar
+                        botao de apagar exposto ao lado de cada linha. */}
+                    <details className="group mt-2">
+                      <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-ink-500 transition-smooth hover:text-ink [&::-webkit-details-marker]:hidden">
+                        <Pencil aria-hidden className="size-3.5" />
+                        Corrigir esta graduação
+                      </summary>
+                      <div className="mt-3 rounded-[10px] border border-line p-3">
+                        <EditarGraduacaoForm
+                          graduationId={g.id}
+                          belt={g.belt}
+                          degree={g.degree}
+                          date={dayKey(g.date)}
+                          notes={g.notes}
+                          criterios={criterios}
+                        />
+                        <form
+                          action={deleteGraduation}
+                          className="mt-3 border-t border-line pt-3"
+                        >
+                          <input type="hidden" name="graduationId" value={g.id} />
+                          <Button
+                            type="submit"
+                            variant="ghost"
+                            size="sm"
+                            className="text-ink-500 hover:text-danger"
+                          >
+                            <Trash2 aria-hidden className="size-4" />
+                            Apagar esta graduação
+                          </Button>
+                        </form>
+                      </div>
+                    </details>
                   </div>
                 </li>
               );

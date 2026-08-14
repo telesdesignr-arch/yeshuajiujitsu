@@ -27,6 +27,14 @@ model User {
   role               String   @default("ALUNO") // ALUNO | PROFESSOR | ADMIN
   active             Boolean  @default(true)
   mustChangePassword Boolean  @default(true)
+
+  // Quando o aluno pediu ajuda para entrar. O professor ve o pedido no painel
+  // e gera uma senha temporaria. Vazio = nao ha pedido pendente.
+  //
+  // Guardamos so a data, e nao um token de redefinicao: enquanto nao existe
+  // servico de envio de e-mail, quem entrega a senha nova e o professor, pelo
+  // WhatsApp. Quando o e-mail entrar, este campo vira o gatilho do envio.
+  passwordResetRequestedAt DateTime?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 
+import { EsqueciSenha } from "./esqueci-senha";
 import { LoginForm } from "./login-form";
 import { Logo, Wordmark } from "@/components/logo";
 import { ACADEMIA, whatsappLink } from "@/lib/academia";
@@ -55,22 +56,26 @@ export default function LoginPage() {
 
           <LoginForm />
 
-          <div className="mt-8 border-t border-line pt-6">
-            <p className="text-sm text-ink-500">
-              Esqueceu a senha ou ainda não tem acesso? Chame o professor{" "}
-              {ACADEMIA.professor} no WhatsApp — ele libera na hora.
-            </p>
-            <a
-              href={whatsappLink(
-                "Olá, professor! Preciso de ajuda para acessar o app da Yeshua Jiu-Jitsu.",
-              )}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-800"
-            >
-              <MessageCircle aria-hidden className="size-4" />
-              Falar no WhatsApp
-            </a>
+          <div className="mt-8 space-y-4 border-t border-line pt-6">
+            <EsqueciSenha />
+
+            <div>
+              <p className="text-sm text-ink-500">
+                Ainda não tem acesso? Chame o professor {ACADEMIA.professor} no
+                WhatsApp — ele libera na hora.
+              </p>
+              <a
+                href={whatsappLink(
+                  "Olá, professor! Preciso de ajuda para acessar o app da Yeshua Jiu-Jitsu.",
+                )}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-800"
+              >
+                <MessageCircle aria-hidden className="size-4" />
+                Falar no WhatsApp
+              </a>
+            </div>
           </div>
         </div>
       </section>

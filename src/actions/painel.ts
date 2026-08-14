@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { hashPassword, requireStaff } from "@/lib/auth";
-import { BELT_KEYS, MAX_DEGREE } from "@/lib/belts";
+import { BELT_KEYS, MAX_DEGREE, graduationRank } from "@/lib/belts";
 import { dataBrasileira, naAcademia } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
@@ -187,6 +187,69 @@ export async function updateStudent(
 }
 
 /* -------------------------------------------------------------------------- */
+/* Senha temporaria                                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Gera uma senha temporaria legivel: "yeshua-4821".
+ *
+ * Legivel de proposito -- o professor vai ditar ou colar no WhatsApp, e senha
+ * embaralhada seria digitada errada. A seguranca vem de o aluno ser obrigado a
+ * trocar no primeiro acesso, nao de a senha temporaria ser complexa.
+ */
+function senhaTemporaria() {
+  const numero = 1000 + Math.floor(Math.random() * 9000);
+  return `yeshua-${numero}`;
+}
+
+export type SenhaGerada = ActionState & {
+  senha?: string;
+  nome?: string;
+  telefone?: string | null;
+};
+
+export async function gerarSenhaTemporaria(
+  _prev: SenhaGerada,
+  formData: FormData,
+): Promise<SenhaGerada> {
+  await requireStaff();
+
+  const userId = String(formData.get("userId") ?? "");
+  if (!userId) return { error: "Usuário não identificado." };
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { student: { select: { phone: true } } },
+  });
+  if (!user) return { error: "Usuário não encontrado." };
+
+  const senha = senhaTemporaria();
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      passwordHash: await hashPassword(senha),
+      // O aluno e obrigado a criar a senha dele no primeiro acesso.
+      mustChangePassword: true,
+      passwordResetRequestedAt: null,
+    },
+  });
+
+  // NAO recarregamos a pagina aqui, de proposito.
+  //
+  // Recarregar apagaria o cartao do pedido (que so aparece enquanto ha pedido
+  // pendente) e levaria junto a senha recem-gerada, antes de o professor
+  // conseguir ler. A senha e o resultado que importa desta acao -- ela precisa
+  // sobreviver na tela. Os dados atualizam sozinhos na proxima navegacao.
+  return {
+    success: "Senha temporária gerada.",
+    senha,
+    nome: user.name,
+    telefone: user.student?.phone ?? null,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
 /* Chamada                                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -325,6 +388,120 @@ export async function addGraduation(
   revalidatePath("/app");
 
   return { success: "Graduação registrada. Já aparece na evolução do aluno." };
+}
+
+/**
+ * Recalcula a faixa atual do aluno a partir das graduacoes que existem.
+ *
+ * Precisa rodar sempre que uma graduacao e editada ou apagada. Sem isso, apagar
+ * a graduacao mais recente deixaria o aluno com uma faixa que nao esta em
+ * lugar nenhum do historico -- e ninguem entenderia de onde ela veio.
+ *
+ * A faixa atual e a da graduacao MAIS RECENTE por data. Empate no mesmo dia e
+ * desempatado pela posicao na escada (a mais alta vence), que e o caso de
+ * quando o professor registra faixa e grau no mesmo treino.
+ */
+async function recalcularGraduacaoAtual(studentId: string) {
+  const [aluno, graduacoes] = await Promise.all([
+    prisma.student.findUnique({
+      where: { id: studentId },
+      select: { joinedAt: true },
+    }),
+    prisma.graduation.findMany({
+      where: { studentId },
+      select: { belt: true, degree: true, date: true },
+    }),
+  ]);
+
+  if (!aluno) return;
+
+  if (graduacoes.length === 0) {
+    // Sem histórico: volta para o começo da escada adulta, contando da entrada.
+    await prisma.student.update({
+      where: { id: studentId },
+      data: { belt: "BRANCA", degree: 0, beltSinceAt: aluno.joinedAt },
+    });
+    return;
+  }
+
+  const atual = graduacoes.reduce((maior, g) => {
+    const diferencaDeData = g.date.getTime() - maior.date.getTime();
+    if (diferencaDeData !== 0) return diferencaDeData > 0 ? g : maior;
+    return graduationRank(g.belt, g.degree) > graduationRank(maior.belt, maior.degree)
+      ? g
+      : maior;
+  });
+
+  await prisma.student.update({
+    where: { id: studentId },
+    data: {
+      belt: atual.belt,
+      degree: atual.degree,
+      beltSinceAt: atual.date,
+    },
+  });
+}
+
+const editarGraduacaoSchema = z.object({
+  graduationId: z.string().min(1),
+  belt: z.enum(BELT_KEYS as [string, ...string[]]),
+  degree: z.coerce.number().int().min(0).max(MAX_DEGREE),
+  date: z.string().min(1, "Informe a data da graduação."),
+  notes: z.string().trim().optional(),
+});
+
+export async function updateGraduation(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireStaff();
+
+  const criterios = formData.getAll("criterio").map(String).filter(Boolean);
+
+  const parsed = editarGraduacaoSchema.safeParse({
+    graduationId: formData.get("graduationId"),
+    belt: formData.get("belt"),
+    degree: formData.get("degree"),
+    date: formData.get("date"),
+    notes: formData.get("notes"),
+  });
+
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+
+  const graduacao = await prisma.graduation.update({
+    where: { id: d.graduationId },
+    data: {
+      belt: d.belt,
+      degree: d.degree,
+      date: dataBrasileira(d.date),
+      notes: d.notes || null,
+      criteria: criterios.length ? JSON.stringify(criterios) : null,
+    },
+  });
+
+  await recalcularGraduacaoAtual(graduacao.studentId);
+
+  revalidatePath(`/painel/alunos/${graduacao.studentId}`);
+  revalidatePath("/painel/graduacoes");
+  revalidatePath("/painel");
+  revalidatePath("/app");
+
+  return { success: "Graduação corrigida. A faixa do aluno foi recalculada." };
+}
+
+export async function deleteGraduation(formData: FormData) {
+  await requireStaff();
+  const id = String(formData.get("graduationId") ?? "");
+  if (!id) return;
+
+  const graduacao = await prisma.graduation.delete({ where: { id } });
+  await recalcularGraduacaoAtual(graduacao.studentId);
+
+  revalidatePath(`/painel/alunos/${graduacao.studentId}`);
+  revalidatePath("/painel/graduacoes");
+  revalidatePath("/painel");
+  revalidatePath("/app");
 }
 
 /* -------------------------------------------------------------------------- */

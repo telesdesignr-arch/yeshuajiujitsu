@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -60,6 +61,48 @@ export async function login(
 export async function logout() {
   await endSession();
   redirect("/login");
+}
+
+/* -------------------------------------------------------------------------- */
+/* Esqueci minha senha                                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * O aluno pede ajuda para entrar.
+ *
+ * Nao enviamos e-mail (ainda nao ha servico de envio configurado) nem
+ * revelamos se o e-mail existe: a resposta e sempre a mesma. Isso impede que
+ * alguem descubra quem estuda na academia testando e-mails na tela de login.
+ *
+ * O pedido aparece no painel do professor, que gera uma senha temporaria.
+ */
+export async function requestPasswordReset(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+
+  const mesmaResposta = {
+    success:
+      "Pedido registrado. O professor vai te mandar uma senha nova pelo WhatsApp. Se demorar, chame ele direto.",
+  };
+
+  if (!email.includes("@")) {
+    return { error: "Digite o e-mail que você usa para entrar." };
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.active) return mesmaResposta;
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordResetRequestedAt: new Date() },
+  });
+
+  revalidatePath("/painel");
+  return mesmaResposta;
 }
 
 const senhaSchema = z

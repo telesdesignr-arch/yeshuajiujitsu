@@ -7,6 +7,7 @@ import { Award, Loader2, MessageSquarePlus, Save } from "lucide-react";
 import {
   addGraduation,
   addNote,
+  updateGraduation,
   updateStudent,
   type ActionState,
 } from "@/actions/painel";
@@ -163,6 +164,127 @@ export function GraduacaoForm({
       </Field>
 
       <Enviar label="Registrar graduação" loading="Registrando..." icon={Award} />
+    </form>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Corrigir uma graduacao ja registrada                                        */
+/* -------------------------------------------------------------------------- */
+
+export function EditarGraduacaoForm({
+  graduationId,
+  belt: beltInicial,
+  degree: degreeInicial,
+  date,
+  notes,
+  criterios,
+}: {
+  graduationId: string;
+  belt: string;
+  degree: number;
+  date: string;
+  notes: string | null;
+  criterios: string[];
+}) {
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    updateGraduation,
+    {},
+  );
+  const [belt, setBelt] = useState(beltInicial);
+  const [degree, setDegree] = useState(String(degreeInicial));
+
+  return (
+    <form action={formAction} className="space-y-4" noValidate>
+      <input type="hidden" name="graduationId" value={graduationId} />
+
+      {state.error && <FormAlert>{state.error}</FormAlert>}
+      {state.success && <FormAlert tone="success">{state.success}</FormAlert>}
+
+      <div className="rounded-[10px] bg-ink-100 p-3">
+        <BeltBar belt={belt} degree={Number(degree)} height={28} />
+        <p className="mt-2 text-sm font-semibold">
+          {graduationLabel(belt, Number(degree))}
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Faixa" htmlFor={`eg-belt-${graduationId}`} required>
+          <Select
+            id={`eg-belt-${graduationId}`}
+            name="belt"
+            value={belt}
+            onChange={(e) => setBelt(e.target.value)}
+            required
+          >
+            <BeltSelectOptions />
+          </Select>
+        </Field>
+
+        <Field label="Graus" htmlFor={`eg-deg-${graduationId}`} required>
+          <Select
+            id={`eg-deg-${graduationId}`}
+            name="degree"
+            value={degree}
+            onChange={(e) => setDegree(e.target.value)}
+            required
+          >
+            {Array.from({ length: MAX_DEGREE + 1 }).map((_, i) => (
+              <option key={i} value={i}>
+                {i === 0 ? "Faixa lisa (sem grau)" : `${i}º grau`}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+
+      <Field label="Data da graduação" htmlFor={`eg-date-${graduationId}`} required>
+        <Input
+          id={`eg-date-${graduationId}`}
+          name="date"
+          type="date"
+          defaultValue={date}
+          max={hojeISO()}
+          required
+        />
+      </Field>
+
+      <fieldset>
+        <legend className="mb-2 text-sm font-semibold">Critérios avaliados</legend>
+        <div className="grid gap-1 sm:grid-cols-2">
+          {GRADUATION_CRITERIA.map((c) => (
+            <label
+              key={c}
+              className="flex min-h-[40px] cursor-pointer items-center gap-2.5 text-sm"
+            >
+              <input
+                type="checkbox"
+                name="criterio"
+                value={c}
+                defaultChecked={criterios.includes(c)}
+                className="size-4 cursor-pointer accent-brand-600"
+              />
+              {c}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <Field label="Observações" htmlFor={`eg-notes-${graduationId}`}>
+        <Textarea
+          id={`eg-notes-${graduationId}`}
+          name="notes"
+          rows={2}
+          defaultValue={notes ?? ""}
+        />
+      </Field>
+
+      <p className="text-xs text-ink-500">
+        A faixa atual do aluno é recalculada a partir da graduação mais recente
+        que sobrar no histórico.
+      </p>
+
+      <Enviar label="Salvar correção" loading="Salvando..." icon={Save} />
     </form>
   );
 }

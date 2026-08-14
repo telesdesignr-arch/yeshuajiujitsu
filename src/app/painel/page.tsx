@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Flame,
   GraduationCap,
+  KeyRound,
   TrendingUp,
   Trophy,
   UserPlus,
@@ -15,13 +16,14 @@ import {
 } from "lucide-react";
 
 import { BeltChip } from "@/components/belt";
+import { SenhaTemporaria } from "@/components/senha-temporaria";
 import { BarChart, DistributionBars } from "@/components/charts";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, Badge, EmptyState, Stat } from "@/components/ui/misc";
 import { beltsDaTrilha } from "@/lib/belts";
 import { requireStaff } from "@/lib/auth";
-import { formatDateShortYear, humanDuration } from "@/lib/dates";
+import { dayKey, formatDateShortYear, hojeISO, humanDuration } from "@/lib/dates";
 import { mesAtual, nomeDoMes, situacao } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
@@ -64,6 +66,18 @@ export default async function PainelHome() {
     .slice(0, 5);
 
   const prontos = candidatos.filter((c) => c.pronto);
+
+  // Alunos que pediram ajuda para entrar
+  const pedidosDeSenha = await prisma.user.findMany({
+    where: { passwordResetRequestedAt: { not: null }, active: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      passwordResetRequestedAt: true,
+    },
+    orderBy: { passwordResetRequestedAt: "asc" },
+  });
 
   // Resumo financeiro do mês corrente
   const mensalidades = await prisma.invoice.findMany({
@@ -136,6 +150,42 @@ export default async function PainelHome() {
           icon={Trophy}
         />
       </div>
+
+      {/* Alunos que não conseguem entrar */}
+      {pedidosDeSenha.length > 0 && (
+        <Card className="border-brand-300 bg-brand-50">
+          <CardBody className="pt-4">
+            <p className="flex items-center gap-2 font-display text-base font-bold tracking-wide text-brand-800 uppercase">
+              <KeyRound aria-hidden className="size-4" />
+              {pedidosDeSenha.length === 1
+                ? "1 aluno não está conseguindo entrar"
+                : `${pedidosDeSenha.length} alunos não estão conseguindo entrar`}
+            </p>
+            <p className="mt-1 mb-3 text-sm text-brand-800">
+              Gere uma senha nova e mande para o aluno. Ele vai criar a senha
+              dele no primeiro acesso.
+            </p>
+
+            <ul className="space-y-3">
+              {pedidosDeSenha.map((u) => (
+                <li
+                  key={u.id}
+                  className="rounded-[10px] border border-brand-200 bg-white p-3"
+                >
+                  <p className="font-semibold">{u.name}</p>
+                  <p className="mb-2 text-xs text-ink-500">
+                    {u.email} ·{" "}
+                    {dayKey(u.passwordResetRequestedAt!) === hojeISO()
+                      ? "pediu hoje"
+                      : `pediu há ${humanDuration(u.passwordResetRequestedAt!)}`}
+                  </p>
+                  <SenhaTemporaria userId={u.id} compacto />
+                </li>
+              ))}
+            </ul>
+          </CardBody>
+        </Card>
+      )}
 
       {/* Financeiro do mês */}
       <Link href="/painel/financeiro" className="block">
