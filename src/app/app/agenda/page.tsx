@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 
-import { EventTypeBadge, classType } from "@/components/event-type";
+import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState } from "@/components/ui/misc";
 import { requireUser } from "@/lib/auth";
@@ -117,7 +117,7 @@ export default async function AgendaPage() {
                         </span>
                         <span className="text-sm">{aula.title}</span>
                       </span>
-                      <Badge tone={aula.type === "KIDS" ? "brand" : "neutral"}>
+                      <Badge tone={TURMAS_JOVENS.includes(aula.type) ? "brand" : "neutral"}>
                         {classType(aula.type).short}
                       </Badge>
                     </li>

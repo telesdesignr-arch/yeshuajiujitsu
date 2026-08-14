@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
-import { EventTypeBadge, classType } from "@/components/event-type";
+import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/misc";
@@ -231,7 +231,7 @@ export default async function HomePage() {
                           </span>
                           <span className="text-sm text-ink-500">{aula.title}</span>
                         </span>
-                        <Badge tone={aula.type === "KIDS" ? "brand" : "neutral"}>
+                        <Badge tone={TURMAS_JOVENS.includes(aula.type) ? "brand" : "neutral"}>
                           {classType(aula.type).short}
                         </Badge>
                       </li>

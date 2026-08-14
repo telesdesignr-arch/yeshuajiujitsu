@@ -3,7 +3,7 @@ import { CalendarDays, CalendarPlus, Clock, MapPin, Trash2 } from "lucide-react"
 
 import { EventoForm, HorarioForm } from "./formularios";
 import { deleteEvent, deleteSchedule } from "@/actions/painel";
-import { EventTypeBadge, classType } from "@/components/event-type";
+import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, Collapsible, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState } from "@/components/ui/misc";
@@ -146,7 +146,7 @@ export default async function PainelAgendaPage() {
                       </span>
                     </span>
                     <span className="flex shrink-0 items-center gap-1">
-                      <Badge tone={aula.type === "KIDS" ? "brand" : "neutral"}>
+                      <Badge tone={TURMAS_JOVENS.includes(aula.type) ? "brand" : "neutral"}>
                         {classType(aula.type).short}
                       </Badge>
                       <form action={deleteSchedule}>

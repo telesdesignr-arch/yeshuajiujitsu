@@ -51,28 +51,28 @@ const SENHA_PADRAO = "yeshua123";
 // ---------------------------------------------------------------------------
 
 const HORARIOS = [
-  { weekday: 1, startTime: "07:00", endTime: "08:00", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 1, startTime: "12:00", endTime: "13:00", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 1, startTime: "17:30", endTime: "18:30", title: "Jiu-Jitsu Kids", type: "KIDS" },
-  { weekday: 1, startTime: "19:00", endTime: "20:30", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 2, startTime: "07:00", endTime: "08:00", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 2, startTime: "19:00", endTime: "20:30", title: "No-Gi", type: "NOGI" },
-  { weekday: 2, startTime: "20:30", endTime: "21:30", title: "Boxe", type: "BOXE" },
-  { weekday: 3, startTime: "07:00", endTime: "08:00", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 3, startTime: "12:00", endTime: "13:00", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 3, startTime: "17:30", endTime: "18:30", title: "Jiu-Jitsu Kids", type: "KIDS" },
-  { weekday: 3, startTime: "19:00", endTime: "20:30", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 4, startTime: "19:00", endTime: "20:30", title: "No-Gi", type: "NOGI" },
-  { weekday: 4, startTime: "20:30", endTime: "21:30", title: "Boxe", type: "BOXE" },
-  { weekday: 5, startTime: "07:00", endTime: "08:00", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 5, startTime: "19:00", endTime: "20:30", title: "Jiu-Jitsu", type: "GI" },
-  { weekday: 6, startTime: "10:00", endTime: "11:30", title: "Treino Livre (Open Mat)", type: "OPEN_MAT" },
+  // Segunda
+  { weekday: 1, startTime: "09:00", endTime: "10:00", title: "Jiu-Jitsu", type: "ADULTO" },
+  { weekday: 1, startTime: "17:00", endTime: "18:00", title: "Jiu-Jitsu Adolescentes", type: "ADOLESCENTE" },
+  { weekday: 1, startTime: "18:00", endTime: "19:00", title: "Jiu-Jitsu Kids", type: "KIDS" },
+  { weekday: 1, startTime: "19:00", endTime: "20:00", title: "Jiu-Jitsu", type: "ADULTO" },
+  // Quarta
+  { weekday: 3, startTime: "09:00", endTime: "10:00", title: "Jiu-Jitsu", type: "ADULTO" },
+  { weekday: 3, startTime: "17:00", endTime: "18:00", title: "Jiu-Jitsu Adolescentes", type: "ADOLESCENTE" },
+  { weekday: 3, startTime: "18:00", endTime: "19:00", title: "Jiu-Jitsu Kids", type: "KIDS" },
+  { weekday: 3, startTime: "19:00", endTime: "20:00", title: "Jiu-Jitsu", type: "ADULTO" },
+  // Sexta
+  { weekday: 5, startTime: "09:00", endTime: "10:00", title: "Jiu-Jitsu", type: "ADULTO" },
+  { weekday: 5, startTime: "17:00", endTime: "18:00", title: "Jiu-Jitsu Adolescentes", type: "ADOLESCENTE" },
+  { weekday: 5, startTime: "18:00", endTime: "19:00", title: "Jiu-Jitsu Kids", type: "KIDS" },
+  { weekday: 5, startTime: "19:00", endTime: "20:00", title: "Jiu-Jitsu", type: "ADULTO" },
+  { weekday: 5, startTime: "20:30", endTime: "22:00", title: "Jiu-Jitsu", type: "ADULTO" },
 ];
 
-// Aulas que entram na chamada do dia a dia (as que geram presenca).
-const AULAS_PRINCIPAIS = HORARIOS.filter((h) =>
-  ["GI", "NOGI", "OPEN_MAT"].includes(h.type),
-);
+// Aulas que entram na chamada dos alunos de exemplo -- que sao todos adultos.
+// As turmas de criancas e adolescentes existem na grade, mas nao recebem
+// presenca ficticia porque nao ha aluno de exemplo nessas faixas etarias.
+const AULAS_PRINCIPAIS = HORARIOS.filter((h) => h.type === "ADULTO");
 
 const TECNICAS = [
   "Passagem de guarda com pressão · joelho na barriga",

@@ -131,7 +131,7 @@ export function HorarioForm() {
           <Input id="hr-start" name="startTime" type="time" defaultValue="19:00" required />
         </Field>
         <Field label="Termina às" htmlFor="hr-end" required>
-          <Input id="hr-end" name="endTime" type="time" defaultValue="20:30" required />
+          <Input id="hr-end" name="endTime" type="time" defaultValue="20:00" required />
         </Field>
       </div>
 
@@ -140,7 +140,7 @@ export function HorarioForm() {
       </Field>
 
       <Field label="Tipo de aula" htmlFor="hr-type" required>
-        <Select id="hr-type" name="type" defaultValue="GI" required>
+        <Select id="hr-type" name="type" defaultValue="ADULTO" required>
           {Object.entries(CLASS_TYPES).map(([key, info]) => (
             <option key={key} value={key}>
               {info.label}
