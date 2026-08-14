@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
+import { CompetitionImage } from "@/components/competition-image";
 import { Federacoes } from "@/components/federacoes";
 import { Medal, MedalTallyRow } from "@/components/medal";
 import { Card, CardBody, SectionTitle } from "@/components/ui/card";
@@ -211,7 +212,14 @@ export default async function CampeonatosDoAlunoPage() {
         ) : (
           <div className="space-y-3">
             {proximos.map((c) => (
-              <Card key={c.id}>
+              <Card key={c.id} className="overflow-hidden">
+                {c.imageUrl && (
+                  <CompetitionImage
+                    src={c.imageUrl}
+                    alt={`Cartaz do ${c.name}`}
+                    ratio="16 / 9"
+                  />
+                )}
                 <CardBody className="pt-4">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Badge tone="warning">

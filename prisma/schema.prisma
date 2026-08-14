@@ -207,6 +207,9 @@ model Competition {
   registrationUrl      String?
   registrationDeadline DateTime?
   description          String?
+  // Cartaz do campeonato. Guardamos o endereco da imagem no site da
+  // federacao, e nao uma copia: e o proprio organizador que mantem.
+  imageUrl             String?
   createdAt            DateTime  @default(now())
 
   results CompetitionResult[]

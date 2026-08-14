@@ -24,6 +24,7 @@ const campeonatoSchema = z.object({
   registrationUrl: z.string().trim().optional(),
   registrationDeadline: z.string().optional(),
   description: z.string().trim().optional(),
+  imageUrl: z.string().trim().optional(),
 });
 
 export async function createCompetition(
@@ -43,10 +44,20 @@ export async function createCompetition(
     registrationUrl: formData.get("registrationUrl"),
     registrationDeadline: formData.get("registrationDeadline"),
     description: formData.get("description"),
+    imageUrl: formData.get("imageUrl"),
   });
 
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
+
+  // O endereço da imagem tem que ser https: um http quebraria o cadeado do
+  // site e o navegador bloquearia a imagem.
+  if (d.imageUrl && !/^https:\/\//i.test(d.imageUrl)) {
+    return {
+      error:
+        "O endereço da imagem precisa começar com https:// — copie clicando com o botão direito na imagem do site da federação e escolhendo “Copiar endereço da imagem”.",
+    };
+  }
 
   if (d.registrationDeadline && d.registrationDeadline > d.date) {
     return {
@@ -70,6 +81,7 @@ export async function createCompetition(
         ? dataBrasileira(d.registrationDeadline, "23:59")
         : null,
       description: d.description || null,
+      imageUrl: d.imageUrl || null,
     },
   });
 

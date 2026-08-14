@@ -14,6 +14,7 @@ import {
 import { ResultadoForm } from "../formularios";
 import { deleteCompetition, deleteResult } from "@/actions/campeonatos";
 import { BeltChip } from "@/components/belt";
+import { CompetitionImage } from "@/components/competition-image";
 import { Medal, MedalTallyRow } from "@/components/medal";
 import { Button } from "@/components/ui/button";
 import {
@@ -91,7 +92,14 @@ export default async function CampeonatoPage({
       </Link>
 
       {/* Cabeçalho */}
-      <Card>
+      <Card className="overflow-hidden">
+        {campeonato.imageUrl && (
+          <CompetitionImage
+            src={campeonato.imageUrl}
+            alt={`Cartaz do ${campeonato.name}`}
+            ratio="16 / 9"
+          />
+        )}
         <CardBody className="pt-5">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge tone="warning">

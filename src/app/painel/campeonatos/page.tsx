@@ -11,6 +11,7 @@ import {
 
 import { CampeonatoForm } from "./formularios";
 import { MedalTallyRow } from "@/components/medal";
+import { CompetitionImage } from "@/components/competition-image";
 import { Federacoes } from "@/components/federacoes";
 import { BeltChip } from "@/components/belt";
 import { Card, CardBody, Collapsible, SectionTitle } from "@/components/ui/card";
@@ -218,17 +219,21 @@ function CampeonatoCard({
     modality: string;
     registrationDeadline: Date | null;
     registrationUrl: string | null;
+    imageUrl: string | null;
     _count: { results: number };
   };
   passado?: boolean;
 }) {
   const c = campeonato;
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <Link
         href={`/painel/campeonatos/${c.id}`}
         className="block transition-smooth hover:opacity-85"
       >
+        {c.imageUrl && (
+          <CompetitionImage src={c.imageUrl} alt={c.name} ratio="16 / 9" />
+        )}
         <CardBody className="pt-4">
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">

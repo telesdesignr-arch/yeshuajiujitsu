@@ -119,6 +119,19 @@ export function CampeonatoForm() {
       </div>
 
       <Field
+        label="Imagem do campeonato"
+        htmlFor="cp-img"
+        hint="No site da federação, clique com o botão direito no cartaz do campeonato e escolha “Copiar endereço da imagem”. Cole aqui."
+      >
+        <Input
+          id="cp-img"
+          name="imageUrl"
+          type="url"
+          placeholder="https://..."
+        />
+      </Field>
+
+      <Field
         label="Informações"
         htmlFor="cp-desc"
         hint="Categorias, pesagem, o que levar, horário de chegada."

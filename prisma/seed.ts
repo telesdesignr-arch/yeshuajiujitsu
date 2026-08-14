@@ -508,6 +508,9 @@ async function main() {
       modality: "AMBOS",
       registrationDeadline: atHour(addMonths(hoje, 1), "23:59"),
       registrationUrl: "https://www.fjjrio.app.br/",
+      // Cartaz real, hospedado na propria FJJRIO -- formato banner (800x533)
+      imageUrl:
+        "https://www.fjjrio.app.br/app/img/eventos/Carioca7bd44d361c25e6223b0679dab35af887407e72bb.jpg",
       description:
         "Principal campeonato do estado. Chaves com e sem kimono, do infantil ao master. Fale com o professor Renato para acertar categoria e peso antes de se inscrever.",
     },
@@ -522,6 +525,9 @@ async function main() {
       modality: "GI",
       registrationDeadline: atHour(addMonths(hoje, 2), "23:59"),
       registrationUrl: "https://cbjj.com.br/events/championships",
+      // Logo real da IBJJF -- formato quadrado (600x600), para exercitar o
+      // caso em que o cartaz nao e um banner deitado
+      imageUrl: "https://www.ibjjfdb.com/Championship/Logo/3369",
       description:
         "Campeonato internacional da IBJJF. Exige filiação e carteirinha em dia.",
     },

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
+import { CompetitionImage } from "@/components/competition-image";
 import { MedalTallyRow } from "@/components/medal";
 import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { ButtonLink } from "@/components/ui/button";
@@ -361,7 +362,14 @@ export default async function HomePage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 {campeonatos.map((c) => (
-                  <Card key={c.id}>
+                  <Card key={c.id} className="overflow-hidden">
+                    {c.imageUrl && (
+                      <CompetitionImage
+                        src={c.imageUrl}
+                        alt={`Cartaz do ${c.name}`}
+                        ratio="16 / 9"
+                      />
+                    )}
                     <CardBody className="pt-5">
                       <Badge tone="warning">
                         <Trophy aria-hidden className="size-3.5" />
