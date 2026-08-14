@@ -2,6 +2,7 @@
   "name": "Yeshua Jiu-Jitsu",
   "short_name": "Yeshua JJ",
   "description": "Acompanhe seus treinos, sua frequência e sua evolução no Jiu-Jitsu.",
+  "id": "/app",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",
@@ -9,12 +10,43 @@
   "background_color": "#ffffff",
   "theme_color": "#14100d",
   "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["sports", "health", "lifestyle"],
   "icons": [
     {
-      "src": "/logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/icones/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icones/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icones/icone-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Meus treinos",
+      "short_name": "Treinos",
+      "url": "/app/treinos"
+    },
+    {
+      "name": "Minha evolução",
+      "short_name": "Evolução",
+      "url": "/app/evolucao"
+    },
+    {
+      "name": "Minha mensalidade",
+      "short_name": "Mensalidade",
+      "url": "/app/financeiro"
     }
   ]
 }
