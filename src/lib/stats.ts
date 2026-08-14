@@ -13,6 +13,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { agora, dayKey, formatMonthYear, monthsSince, naAcademia } from "@/lib/dates";
 import { nextStep } from "@/lib/belts";
+import { filtroDeAlunosPorModalidade } from "@/lib/modalities";
 
 /**
  * Calculo de frequencia e evolucao do aluno.
@@ -261,6 +262,9 @@ export type AcademyOverview = {
   competidores: number;
   frequenciaMedia: number;
   porFaixa: { belt: string; count: number }[];
+  /** Quantos alunos ativos fazem Jiu-Jitsu: e o total da distribuicao por
+   *  faixa, que nao inclui quem so treina boxe. */
+  alunosQueGraduam: number;
   historico: {
     short: string;
     label: string;
@@ -290,9 +294,11 @@ export async function getAcademyOverview(): Promise<AcademyOverview> {
         where: { date: { gte: monthStart, lte: monthEnd } },
       }),
       prisma.student.count({ where: { active: true, isCompetitor: true } }),
+      // Só quem faz Jiu-Jitsu entra na distribuição de faixas. Contar os
+      // alunos de boxe encheria a faixa branca com gente que não gradua.
       prisma.student.groupBy({
         by: ["belt"],
-        where: { active: true },
+        where: { active: true, modality: filtroDeAlunosPorModalidade("JIU_JITSU") },
         _count: { _all: true },
       }),
     ]);
@@ -344,6 +350,7 @@ export async function getAcademyOverview(): Promise<AcademyOverview> {
         ? Math.round((presencasNoMes / metaProporcionalAtual) * 100)
         : 0,
     porFaixa: porFaixaRaw.map((f) => ({ belt: f.belt, count: f._count._all })),
+    alunosQueGraduam: porFaixaRaw.reduce((s, f) => s + f._count._all, 0),
     historico,
   };
 }
@@ -373,7 +380,8 @@ export type GraduationCandidate = {
 
 export async function getGraduationCandidates(): Promise<GraduationCandidate[]> {
   const students = await prisma.student.findMany({
-    where: { active: true },
+    // Boxe não tem graduação, então quem só faz boxe nunca é candidato.
+    where: { active: true, modality: filtroDeAlunosPorModalidade("JIU_JITSU") },
     include: { user: { select: { name: true } } },
   });
 

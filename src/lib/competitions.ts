@@ -108,9 +108,9 @@ export function placementInfo(placement: number): PlacementInfo {
 
 /** Opcoes oferecidas ao professor ao registrar um resultado. */
 export const PLACEMENT_OPTIONS = [
-  { value: 1, label: "1º lugar — Ouro" },
-  { value: 2, label: "2º lugar — Prata" },
-  { value: 3, label: "3º lugar — Bronze" },
+  { value: 1, label: "1º lugar (ouro)" },
+  { value: 2, label: "2º lugar (prata)" },
+  { value: 3, label: "3º lugar (bronze)" },
   { value: 4, label: "4º lugar" },
   { value: 5, label: "5º lugar" },
   { value: 0, label: "Participou (sem medalha)" },

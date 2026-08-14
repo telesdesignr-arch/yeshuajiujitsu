@@ -66,7 +66,7 @@ export function PlanoForm() {
         <Input
           id="pl-name"
           name="name"
-          placeholder="Ex.: Adulto — 3x por semana"
+          placeholder="Ex.: Adulto, 3x por semana"
           required
         />
       </Field>

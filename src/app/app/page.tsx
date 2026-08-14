@@ -17,6 +17,7 @@ import { Badge, EmptyState, Progress, Stat } from "@/components/ui/misc";
 import { graduationLabel, nextStep } from "@/lib/belts";
 import { SITUACAO_INFO, mesAtual, nomeDoMes, situacao } from "@/lib/finance";
 import { formatMoney } from "@/lib/money";
+import { modalityLabel, temGraduacao } from "@/lib/modalities";
 import { requireStudent } from "@/lib/auth";
 import {
   formatDateLong,
@@ -76,34 +77,50 @@ export default async function AppHome() {
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
       <div className="space-y-6">
 
-      {/* Cartão da faixa */}
+      {/* Cartão do topo: a faixa, para quem faz Jiu-Jitsu. Quem só treina boxe
+          não tem graduação, então vê o tempo de casa no lugar. */}
       <Card className="overflow-hidden border-ink bg-ink text-white">
         <CardBody className="pt-5">
           <p className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
-            Sua graduação
-          </p>
-          <p className="mt-1.5 font-display text-2xl font-bold tracking-wide uppercase">
-            {graduationLabel(student.belt, student.degree)}
+            {temGraduacao(student.modality) ? "Sua graduação" : "Sua modalidade"}
           </p>
 
-          {/* fundo claro atrás da faixa: sem ele a ponteira preta some no
-              cartão escuro */}
-          <div className="my-4 rounded-[10px] bg-white/10 p-2">
-            <BeltBar belt={student.belt} degree={student.degree} height={38} />
-          </div>
+          {temGraduacao(student.modality) ? (
+            <>
+              <p className="mt-1.5 font-display text-2xl font-bold tracking-wide uppercase">
+                {graduationLabel(student.belt, student.degree)}
+              </p>
 
-          <div className="flex items-center justify-between gap-4 text-sm">
-            <span className="text-white/60">
-              Há {humanDuration(student.beltSinceAt)} nesta graduação
-            </span>
-            <Link
-              href="/app/evolucao"
-              className="inline-flex shrink-0 items-center gap-1 font-semibold text-brand-300 transition-smooth hover:text-brand-200"
-            >
-              Ver evolução
-              <ArrowRight aria-hidden className="size-3.5" />
-            </Link>
-          </div>
+              {/* fundo claro atrás da faixa: sem ele a ponteira preta some no
+                  cartão escuro */}
+              <div className="my-4 rounded-[10px] bg-white/10 p-2">
+                <BeltBar belt={student.belt} degree={student.degree} height={38} />
+              </div>
+
+              <div className="flex items-center justify-between gap-4 text-sm">
+                <span className="text-white/60">
+                  Há {humanDuration(student.beltSinceAt)} nesta graduação
+                </span>
+                <Link
+                  href="/app/evolucao"
+                  className="inline-flex shrink-0 items-center gap-1 font-semibold text-brand-300 transition-smooth hover:text-brand-200"
+                >
+                  Ver evolução
+                  <ArrowRight aria-hidden className="size-3.5" />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="mt-1.5 font-display text-2xl font-bold tracking-wide uppercase">
+                {modalityLabel(student.modality)}
+              </p>
+              <p className="mt-4 text-sm text-white/60">
+                Na equipe há {humanDuration(student.joinedAt)}. O boxe não tem
+                faixa, então o que conta aqui é a presença.
+              </p>
+            </>
+          )}
         </CardBody>
       </Card>
 
@@ -163,8 +180,8 @@ export default async function AppHome() {
         </CardBody>
       </Card>
 
-      {/* Próximo objetivo */}
-      <Card>
+      {/* Próximo objetivo (só faz sentido para quem gradua) */}
+      <Card className={temGraduacao(student.modality) ? undefined : "hidden"}>
         <CardBody className="pt-5">
           <div className="flex items-center gap-2">
             <TrendingUp aria-hidden className="size-4 text-brand-600" />
@@ -186,8 +203,8 @@ export default async function AppHome() {
               />
               <p className="mt-2.5 text-sm text-ink-500">
                 {stats.monthsOnCurrentGrade >= proximo.expectedMonths
-                  ? `Você já cumpriu os ${proximo.expectedMonths} ${pluralize(proximo.expectedMonths, "mês", "meses")} de referência. Mantenha a frequência — a graduação pode vir em qualquer treino.`
-                  : `${stats.monthsOnCurrentGrade} de ${proximo.expectedMonths} ${pluralize(proximo.expectedMonths, "mês", "meses")} de referência. Quem decide é o professor — frequência e evolução contam mais que o calendário.`}
+                  ? `Você já cumpriu os ${proximo.expectedMonths} ${pluralize(proximo.expectedMonths, "mês", "meses")} de referência. Mantenha a frequência, porque a graduação pode vir em qualquer treino.`
+                  : `${stats.monthsOnCurrentGrade} de ${proximo.expectedMonths} ${pluralize(proximo.expectedMonths, "mês", "meses")} de referência. Quem decide é o professor, e frequência e evolução contam mais que o calendário.`}
               </p>
             </>
           ) : (

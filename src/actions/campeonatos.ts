@@ -55,7 +55,7 @@ export async function createCompetition(
   if (d.imageUrl && !/^https:\/\//i.test(d.imageUrl)) {
     return {
       error:
-        "O endereço da imagem precisa começar com https:// — copie clicando com o botão direito na imagem do site da federação e escolhendo “Copiar endereço da imagem”.",
+        'O endereço da imagem precisa começar com https://. Clique com o botão direito na imagem do site da federação e escolha "Copiar endereço da imagem".',
     };
   }
 

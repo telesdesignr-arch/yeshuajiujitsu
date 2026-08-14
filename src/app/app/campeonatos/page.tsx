@@ -20,6 +20,12 @@ import {
   placementInfo,
   tallyMedals,
 } from "@/lib/competitions";
+// `modalityLabel` acima é a modalidade da luta (Gi / No-Gi). Esta é a
+// modalidade que o aluno treina (Jiu-Jitsu / boxe), por isso o apelido.
+import {
+  modalityLabel as labelDaModalidade,
+  temGraduacao,
+} from "@/lib/modalities";
 import { agora, formatDateLong, formatDateShortYear } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { pluralize } from "@/lib/utils";
@@ -81,18 +87,22 @@ export default async function CampeonatosDoAlunoPage() {
             {student.user.name}
           </p>
           <p className="text-sm text-white/60">
-            {graduationLabel(student.belt, student.degree)}
+            {temGraduacao(student.modality)
+              ? graduationLabel(student.belt, student.degree)
+              : labelDaModalidade(student.modality)}
           </p>
 
-          <div className="my-4 rounded-[10px] bg-white/10 p-2">
-            <BeltBar belt={student.belt} degree={student.degree} height={30} />
-          </div>
+          {temGraduacao(student.modality) && (
+            <div className="my-4 rounded-[10px] bg-white/10 p-2">
+              <BeltBar belt={student.belt} degree={student.degree} height={30} />
+            </div>
+          )}
 
           {tally.lutas === 0 ? (
             <p className="text-sm text-white/70">
               Você ainda não competiu pela equipe. Quando quiser entrar numa
-              chave, fale com o professor — ele te ajuda a escolher o campeonato
-              e a categoria.
+              chave, fale com o professor que ele te ajuda a escolher o
+              campeonato e a categoria.
             </p>
           ) : (
             <>
@@ -168,7 +178,7 @@ export default async function CampeonatosDoAlunoPage() {
                               <Medal placement={r.placement} size={28} />
                             ) : (
                               <span className="text-xs font-bold text-ink-300">
-                                {r.placement > 0 ? `${r.placement}º` : "—"}
+                                {r.placement > 0 ? `${r.placement}º` : "·"}
                               </span>
                             )}
                           </span>
@@ -177,8 +187,8 @@ export default async function CampeonatosDoAlunoPage() {
                               {info.label}
                               {r.category && (
                                 <span className="font-normal text-ink-500">
-                                  {" "}
-                                  — {r.category}
+                                  {" · "}
+                                  {r.category}
                                 </span>
                               )}
                             </span>

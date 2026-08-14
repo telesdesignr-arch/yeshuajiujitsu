@@ -42,13 +42,23 @@ function useIsActive() {
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 }
 
+/**
+ * Quem so treina boxe nao tem faixa, entao a tela de Evolucao (que e toda
+ * sobre graduacao) sai do menu -- em vez de aparecer vazia.
+ */
+function filtrar(itens: Item[], temGraduacao: boolean) {
+  return temGraduacao
+    ? itens
+    : itens.filter((i) => i.href !== "/app/evolucao");
+}
+
 /** Barra lateral, usada no computador. */
-export function AlunoSidebarNav() {
+export function AlunoSidebarNav({ temGraduacao = true }: { temGraduacao?: boolean }) {
   const isActive = useIsActive();
 
   return (
     <nav aria-label="Navegação principal" className="space-y-1">
-      {ITEMS_LATERAL.map((item) => {
+      {filtrar(ITEMS_LATERAL, temGraduacao).map((item) => {
         const active = isActive(item);
         const Icon = item.icon;
         return (
@@ -72,8 +82,9 @@ export function AlunoSidebarNav() {
   );
 }
 
-export function BottomNav() {
+export function BottomNav({ temGraduacao = true }: { temGraduacao?: boolean }) {
   const pathname = usePathname();
+  const itens = filtrar(ITEMS, temGraduacao);
 
   return (
     <nav
@@ -82,7 +93,7 @@ export function BottomNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex max-w-lg">
-        {ITEMS.map((item) => {
+        {itens.map((item) => {
           const active = item.exact
             ? pathname === item.href
             : pathname.startsWith(item.href);

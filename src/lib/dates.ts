@@ -72,23 +72,23 @@ export function hojeISO() {
 }
 
 export function formatDate(date: Date | string | null | undefined) {
-  if (!date) return "—";
+  if (!date) return "não informado";
   return format(naAcademia(date), "dd/MM/yyyy");
 }
 
 export function formatDateLong(date: Date | string | null | undefined) {
-  if (!date) return "—";
+  if (!date) return "não informado";
   return format(naAcademia(date), "d 'de' MMMM 'de' yyyy", { locale: ptBR });
 }
 
 export function formatDateShort(date: Date | string | null | undefined) {
-  if (!date) return "—";
+  if (!date) return "não informado";
   return format(naAcademia(date), "d 'de' MMM", { locale: ptBR });
 }
 
 /** "13 de ago" no ano corrente, "13 de dez de 2025" nos outros. */
 export function formatDateShortYear(date: Date | string | null | undefined) {
-  if (!date) return "—";
+  if (!date) return "não informado";
   const d = naAcademia(date);
   const mesmoAno = d.getFullYear() === agora().getFullYear();
   return format(d, mesmoAno ? "d 'de' MMM" : "d 'de' MMM 'de' yyyy", {

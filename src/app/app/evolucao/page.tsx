@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Award, CalendarCheck, Medal, Target, User } from "lucide-react";
 
 import { BeltBar, BeltChip, DegreeDots } from "@/components/belt";
@@ -14,6 +15,7 @@ import {
 } from "@/lib/belts";
 import { requireStudent } from "@/lib/auth";
 import { formatDateLong, humanDuration } from "@/lib/dates";
+import { temGraduacao } from "@/lib/modalities";
 import { prisma } from "@/lib/prisma";
 import { getStudentStats } from "@/lib/stats";
 import { pluralize } from "@/lib/utils";
@@ -23,6 +25,11 @@ export const dynamic = "force-dynamic";
 
 export default async function EvolucaoPage() {
   const { student } = await requireStudent();
+
+  // A página inteira é sobre faixa e graus. Quem só treina boxe não tem nada
+  // disso, então volta para o início (o link já some do menu, isto cobre quem
+  // digita o endereço na mão ou tem a página salva nos favoritos).
+  if (!temGraduacao(student.modality)) redirect("/app");
 
   const [graduacoes, stats] = await Promise.all([
     prisma.graduation.findMany({

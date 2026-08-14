@@ -7,6 +7,10 @@ import { Card, CardBody } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/misc";
 import { requireStaff } from "@/lib/auth";
 import { WEEKDAYS, dataBrasileira, hojeISO, naAcademia } from "@/lib/dates";
+import {
+  filtroDeAlunosPorModalidade,
+  type Modality,
+} from "@/lib/modalities";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Chamada" };
@@ -33,9 +37,22 @@ export default async function ChamadaPage({
   const scheduleId =
     aulasDoDia.find((a) => a.id === params.aula)?.id ?? aulasDoDia[0]?.id ?? "";
 
+  const aulaEscolhida = aulasDoDia.find((a) => a.id === scheduleId);
+
   const [alunos, sessaoExistente] = await Promise.all([
+    // Só entram na chamada os alunos que treinam a modalidade da aula. Numa
+    // aula de boxe não faz sentido rolar a lista inteira de Jiu-Jitsu.
     prisma.student.findMany({
-      where: { active: true },
+      where: {
+        active: true,
+        ...(aulaEscolhida
+          ? {
+              modality: filtroDeAlunosPorModalidade(
+                aulaEscolhida.modality as Modality,
+              ),
+            }
+          : {}),
+      },
       include: { user: { select: { name: true } } },
       orderBy: { user: { name: "asc" } },
     }),
@@ -73,6 +90,8 @@ export default async function ChamadaPage({
               id: a.id,
               label: `${a.startTime} · ${a.title}`,
             }))}
+            modalidade={aulaEscolhida?.modality}
+            quantosAlunos={alunos.length}
           />
           {sessaoExistente && (
             <p className="mt-3 rounded-[8px] bg-brand-50 px-3 py-2 text-sm text-brand-800">
@@ -101,6 +120,7 @@ export default async function ChamadaPage({
             photoUrl: a.photoUrl,
             belt: a.belt,
             degree: a.degree,
+            modality: a.modality,
           }))}
           presentesIniciais={
             sessaoExistente?.attendances.map((p) => p.studentId) ?? []

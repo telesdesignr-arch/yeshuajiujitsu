@@ -9,6 +9,7 @@ import { BeltChip } from "@/components/belt";
 import { Button } from "@/components/ui/button";
 import { Field, FormAlert, Input, Textarea } from "@/components/ui/field";
 import { Avatar } from "@/components/ui/misc";
+import { temGraduacao } from "@/lib/modalities";
 import { cn } from "@/lib/utils";
 
 export type AlunoDaChamada = {
@@ -17,6 +18,8 @@ export type AlunoDaChamada = {
   photoUrl: string | null;
   belt: string;
   degree: number;
+  /** JIU_JITSU | BOXE | AMBOS -- quem só faz boxe não tem faixa para mostrar */
+  modality: string;
 };
 
 function BotaoSalvar({ total }: { total: number }) {
@@ -144,7 +147,11 @@ export function ChamadaForm({
                 <Avatar name={aluno.name} src={aluno.photoUrl} size={40} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold">{aluno.name}</span>
-                  <BeltChip belt={aluno.belt} degree={aluno.degree} size="sm" />
+                  {temGraduacao(aluno.modality) ? (
+                    <BeltChip belt={aluno.belt} degree={aluno.degree} size="sm" />
+                  ) : (
+                    <span className="text-xs text-ink-500">Boxe</span>
+                  )}
                 </span>
                 <span
                   aria-hidden

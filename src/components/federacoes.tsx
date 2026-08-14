@@ -10,7 +10,7 @@ import { FEDERACOES } from "@/lib/competitions";
  * atualizada. Aqui na Yeshua fica so o que o professor selecionou.
  */
 export function Federacoes({
-  descricao = "O professor publica aqui os campeonatos que valem a pena para a equipe. Se quiser ver o calendário completo, é nestes sites — eles são atualizados pelas próprias federações.",
+  descricao = "O professor publica aqui os campeonatos que valem a pena para a equipe. O calendário completo fica nestes sites, atualizados pelas próprias federações.",
 }: {
   descricao?: string;
 }) {

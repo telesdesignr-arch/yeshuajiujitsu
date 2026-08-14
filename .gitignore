@@ -21,3 +21,6 @@ prisma/dev.db*
 # fotos enviadas em desenvolvimento
 public/uploads/*
 !public/uploads/.gitkeep
+
+# Skills instaladas localmente (nao fazem parte do site)
+.claude/skills/

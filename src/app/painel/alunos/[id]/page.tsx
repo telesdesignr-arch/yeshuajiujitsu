@@ -163,7 +163,7 @@ export default async function AlunoPage({
                 )}
                 <Badge tone="neutral">
                   <User aria-hidden className="size-3" />
-                  Prof. {student.professor?.name ?? "—"}
+                  Prof. {student.professor?.name ?? "a definir"}
                 </Badge>
               </div>
             </div>
@@ -405,6 +405,7 @@ export default async function AlunoPage({
             guardianName: student.guardianName,
             emergencyContact: student.emergencyContact,
             observations: student.observations,
+            modality: student.modality,
           }}
         />
       </Collapsible>

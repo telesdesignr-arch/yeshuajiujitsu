@@ -62,7 +62,14 @@ model Student {
   professorId  String?
   professor    User?     @relation("ResponsibleProfessor", fields: [professorId], references: [id], onDelete: SetNull)
 
-  // graduacao atual
+  // O que o aluno treina: JIU_JITSU | BOXE | AMBOS
+  //
+  // Define o que ele enxerga. Quem so faz boxe nao ve faixa nem graduacao --
+  // boxe nao tem sistema de faixas. Um campo unico com tres valores em vez de
+  // uma lista para o schema seguir portavel entre Postgres e SQLite.
+  modality     String    @default("JIU_JITSU")
+
+  // graduacao atual (so faz sentido para quem treina Jiu-Jitsu)
   belt         String    @default("BRANCA") // BRANCA | AZUL | ROXA | MARROM | PRETA
   degree       Int       @default(0) // 0 a 4 graus
   beltSinceAt  DateTime  @default(now()) // desde quando esta nesta faixa/grau
@@ -134,7 +141,8 @@ model ClassSchedule {
   startTime   String // "19:00"
   endTime     String // "20:30"
   title       String
-  type        String  @default("GI") // GI | NOGI | KIDS | OPEN_MAT | FEMININO | BOXE
+  modality    String  @default("JIU_JITSU") // JIU_JITSU | BOXE
+  type        String  @default("GI") // ADULTO | ADOLESCENTE | KIDS | NOGI | OPEN_MAT | BOXE
   professorId String?
   professor   User?   @relation("ScheduleProfessor", fields: [professorId], references: [id], onDelete: SetNull)
   active      Boolean @default(true)
@@ -150,6 +158,7 @@ model AttendanceSession {
   id          String   @id @default(cuid())
   date        DateTime
   title       String
+  modality    String   @default("JIU_JITSU")
   type        String   @default("GI")
 
   scheduleId  String?

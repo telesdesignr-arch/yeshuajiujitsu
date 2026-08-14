@@ -19,6 +19,7 @@ const alunoSchema = z.object({
   name: z.string().trim().min(3, "Digite o nome completo do aluno."),
   email: z.string().trim().toLowerCase().email("Digite um e-mail válido."),
   phone: z.string().trim().optional(),
+  modality: z.enum(["JIU_JITSU", "BOXE", "AMBOS"]),
   belt: z.enum(BELT_KEYS as [string, ...string[]]),
   degree: z.coerce.number().int().min(0).max(MAX_DEGREE),
   joinedAt: z.string().min(1, "Informe a data de entrada na academia."),
@@ -42,6 +43,7 @@ export async function createStudent(
     name: formData.get("name"),
     email: formData.get("email"),
     phone: formData.get("phone"),
+    modality: formData.get("modality"),
     belt: formData.get("belt"),
     degree: formData.get("degree"),
     joinedAt: formData.get("joinedAt"),
@@ -87,6 +89,7 @@ export async function createStudent(
         userId: user.id,
         professorId: staff.userId,
         phone: data.phone || null,
+        modality: data.modality,
         belt: data.belt,
         degree: data.degree,
         joinedAt,
@@ -101,16 +104,19 @@ export async function createStudent(
     novoId = student.id;
 
     // Registra a graduação atual para a linha do tempo já começar preenchida.
-    await tx.graduation.create({
-      data: {
-        studentId: student.id,
-        belt: data.belt,
-        degree: data.degree,
-        date: beltSinceAt,
-        awardedById: staff.userId,
-        notes: "Graduação registrada no cadastro do aluno.",
-      },
-    });
+    // Quem só treina boxe não tem graduação, então não gera nada.
+    if (data.modality !== "BOXE") {
+      await tx.graduation.create({
+        data: {
+          studentId: student.id,
+          belt: data.belt,
+          degree: data.degree,
+          date: beltSinceAt,
+          awardedById: staff.userId,
+          notes: "Graduação registrada no cadastro do aluno.",
+        },
+      });
+    }
   });
 
   revalidatePath("/painel/alunos");
@@ -134,6 +140,7 @@ export async function updateStudent(
     name: formData.get("name"),
     email: formData.get("email"),
     phone: formData.get("phone"),
+    modality: formData.get("modality"),
     monthlyGoal: formData.get("monthlyGoal"),
     isCompetitor: formData.get("isCompetitor") === "on",
     active: formData.get("active") === "on",
@@ -171,6 +178,7 @@ export async function updateStudent(
       where: { id: d.studentId },
       data: {
         phone: d.phone || null,
+        ...(d.modality ? { modality: d.modality } : {}),
         monthlyGoal: d.monthlyGoal ?? 12,
         isCompetitor: !!d.isCompetitor,
         active: d.active ?? true,
@@ -298,6 +306,7 @@ export async function saveAttendance(
         data: {
           date: dataAula,
           title: `${schedule.title} · ${schedule.startTime}`,
+          modality: schedule.modality,
           type: schedule.type,
           scheduleId: schedule.id,
           professorId: staff.userId,

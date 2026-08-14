@@ -7,6 +7,7 @@ import { Wordmark } from "@/components/logo";
 import { BeltChip } from "@/components/belt";
 import { Avatar } from "@/components/ui/misc";
 import { getCurrentStudent, requireUser } from "@/lib/auth";
+import { modalityLabel, temGraduacao } from "@/lib/modalities";
 import { isStaff } from "@/lib/session";
 
 /**
@@ -24,6 +25,9 @@ export default async function AlunoLayout({
 }) {
   const session = await requireUser();
   const student = await getCurrentStudent();
+
+  // Quem só treina boxe não tem faixa: a tela de Evolução sai do menu.
+  const mostraGraduacao = student ? temGraduacao(student.modality) : true;
 
   return (
     <div className="min-h-dvh bg-ink-100/70">
@@ -53,7 +57,7 @@ export default async function AlunoLayout({
             <Wordmark size={38} />
           </Link>
 
-          <AlunoSidebarNav />
+          <AlunoSidebarNav temGraduacao={mostraGraduacao} />
 
           <div className="mt-auto space-y-1 border-t border-line pt-4">
             {student && (
@@ -67,11 +71,17 @@ export default async function AlunoLayout({
                   <p className="truncate text-sm font-semibold">
                     {student.user.name}
                   </p>
-                  <BeltChip
-                    belt={student.belt}
-                    degree={student.degree}
-                    size="sm"
-                  />
+                  {mostraGraduacao ? (
+                    <BeltChip
+                      belt={student.belt}
+                      degree={student.degree}
+                      size="sm"
+                    />
+                  ) : (
+                    <p className="text-xs text-ink-500">
+                      {modalityLabel(student.modality)}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -95,7 +105,7 @@ export default async function AlunoLayout({
         </main>
       </div>
 
-      <BottomNav />
+      <BottomNav temGraduacao={mostraGraduacao} />
     </div>
   );
 }

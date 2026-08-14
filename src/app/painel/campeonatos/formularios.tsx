@@ -96,7 +96,7 @@ export function CampeonatoForm() {
         <Input
           id="cp-local"
           name="location"
-          placeholder="Ex.: Tijuca Tênis Clube — Rio de Janeiro"
+          placeholder="Ex.: Tijuca Tênis Clube, Rio de Janeiro"
         />
       </Field>
 

@@ -144,12 +144,79 @@ a,
   text-wrap: balance;
 }
 
-/* Fundo preto texturizado usado nas secoes de destaque do site publico */
+/* Fundo preto texturizado usado nas secoes de destaque do site publico.
+   Alem dos dois halos marrons, uma trama diagonal finissima da textura de
+   tecido -- lembra a trama do kimono sem virar estampa. */
 .bg-tatame {
+  position: relative;
   background-color: var(--color-ink);
   background-image:
     radial-gradient(circle at 18% 12%, rgb(138 86 40 / 0.30), transparent 55%),
-    radial-gradient(circle at 82% 88%, rgb(115 64 29 / 0.26), transparent 50%);
+    radial-gradient(circle at 82% 88%, rgb(115 64 29 / 0.26), transparent 50%),
+    repeating-linear-gradient(
+      135deg,
+      rgb(255 255 255 / 0.022) 0 1px,
+      transparent 1px 7px
+    );
+}
+
+/* Fio de marca no topo de uma secao escura: marrom escuro -> marrom claro,
+   como a ponta vermelha da faixa, mas na cor da academia. */
+.rule-marca {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-800),
+    var(--color-brand-400) 45%,
+    var(--color-brand-red)
+  );
+}
+
+/* Traco curto que antecede o rotulo de cada secao (ritmo editorial) */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-brand-600);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 2px;
+  background: currentColor;
+}
+
+/* Entrada em cascata: cada filho direto entra 60ms depois do anterior.
+   So o carregamento da pagina usa isso, para nao poluir com micro-animacao. */
+.cascata > * {
+  animation: rise 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cascata > *:nth-child(1) { animation-delay: 40ms; }
+.cascata > *:nth-child(2) { animation-delay: 100ms; }
+.cascata > *:nth-child(3) { animation-delay: 160ms; }
+.cascata > *:nth-child(4) { animation-delay: 220ms; }
+.cascata > *:nth-child(5) { animation-delay: 280ms; }
+.cascata > *:nth-child(6) { animation-delay: 340ms; }
+
+/* Cartao que reage ao mouse no site publico (no toque nao muda nada) */
+@media (hover: hover) {
+  .card-hover {
+    transition:
+      transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 220ms ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-raised);
+    border-color: var(--color-brand-200);
+  }
 }
 
 /* Animacao de entrada dos cartoes (curta, 220ms, ease-out) */

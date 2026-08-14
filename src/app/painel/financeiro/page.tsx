@@ -361,7 +361,7 @@ export default async function FinanceiroPage({
       )}
 
       <p className="text-xs text-ink-500">
-        Planos não são apagados, só desativados — mensalidades antigas continuam
+        Planos não são apagados, só desativados. As mensalidades antigas continuam
         apontando para eles.
       </p>
 

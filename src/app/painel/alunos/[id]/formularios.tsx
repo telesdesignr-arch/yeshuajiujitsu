@@ -23,6 +23,7 @@ import {
   nextStep,
 } from "@/lib/belts";
 import { hojeISO } from "@/lib/dates";
+import { MODALITY_OPTIONS } from "@/lib/modalities";
 
 function Enviar({
   label,
@@ -379,7 +380,7 @@ export function FinanceiroAlunoForm({
           <option value="">Sem plano</option>
           {planos.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.name} — {formatMoney(p.priceCents)}
+              {p.name} · {formatMoney(p.priceCents)}
             </option>
           ))}
         </Select>
@@ -449,6 +450,7 @@ export function EditarAlunoForm({
     guardianName: string | null;
     emergencyContact: string | null;
     observations: string | null;
+    modality: string;
   };
 }) {
   const [state, formAction] = useActionState<ActionState, FormData>(
@@ -479,6 +481,24 @@ export function EditarAlunoForm({
 
       <Field label="Telefone / WhatsApp" htmlFor="ed-phone">
         <Input id="ed-phone" name="phone" type="tel" defaultValue={student.phone ?? ""} />
+      </Field>
+
+      <Field
+        label="O que o aluno treina"
+        htmlFor="ed-modality"
+        hint="Muda o que ele vê no aplicativo. Quem só faz boxe não vê faixa nem graduação."
+      >
+        <Select
+          id="ed-modality"
+          name="modality"
+          defaultValue={student.modality}
+        >
+          {MODALITY_OPTIONS.map((m) => (
+            <option key={m.value} value={m.value}>
+              {m.label}
+            </option>
+          ))}
+        </Select>
       </Field>
 
       <Field label="Meta de treinos por mês" htmlFor="ed-goal">

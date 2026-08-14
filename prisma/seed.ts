@@ -56,24 +56,45 @@ const SENHA_PADRAO = "yeshua123";
 // Horarios das aulas (FICTICIOS - trocar pelos horarios reais da academia)
 // ---------------------------------------------------------------------------
 
-const HORARIOS = [
-  // Segunda
-  { weekday: 1, startTime: "09:00", endTime: "10:00", title: "Jiu-Jitsu", type: "ADULTO" },
-  { weekday: 1, startTime: "17:00", endTime: "18:00", title: "Jiu-Jitsu Adolescentes", type: "ADOLESCENTE" },
-  { weekday: 1, startTime: "18:00", endTime: "19:00", title: "Jiu-Jitsu Kids", type: "KIDS" },
-  { weekday: 1, startTime: "19:00", endTime: "20:00", title: "Jiu-Jitsu", type: "ADULTO" },
-  // Quarta
-  { weekday: 3, startTime: "09:00", endTime: "10:00", title: "Jiu-Jitsu", type: "ADULTO" },
-  { weekday: 3, startTime: "17:00", endTime: "18:00", title: "Jiu-Jitsu Adolescentes", type: "ADOLESCENTE" },
-  { weekday: 3, startTime: "18:00", endTime: "19:00", title: "Jiu-Jitsu Kids", type: "KIDS" },
-  { weekday: 3, startTime: "19:00", endTime: "20:00", title: "Jiu-Jitsu", type: "ADULTO" },
-  // Sexta
-  { weekday: 5, startTime: "09:00", endTime: "10:00", title: "Jiu-Jitsu", type: "ADULTO" },
-  { weekday: 5, startTime: "17:00", endTime: "18:00", title: "Jiu-Jitsu Adolescentes", type: "ADOLESCENTE" },
-  { weekday: 5, startTime: "18:00", endTime: "19:00", title: "Jiu-Jitsu Kids", type: "KIDS" },
-  { weekday: 5, startTime: "19:00", endTime: "20:00", title: "Jiu-Jitsu", type: "ADULTO" },
-  { weekday: 5, startTime: "20:30", endTime: "22:00", title: "Jiu-Jitsu", type: "ADULTO" },
+// Segunda, quarta e sexta, nas duas modalidades.
+//
+// Os horarios de boxe entre 12h e 16h que o Renato citou nao entram aqui: sao
+// horarios que a academia tem disponiveis mas ainda sem turma formada. Se
+// entrassem, o professor abriria a chamada e nao teria ninguem.
+const DIAS_DE_AULA = [1, 3, 5]; // segunda, quarta, sexta
+
+const AULAS_DO_DIA = [
+  // Boxe da manha
+  { startTime: "07:00", endTime: "08:00", title: "Boxe", modality: "BOXE", type: "BOXE" },
+  { startTime: "08:00", endTime: "09:00", title: "Boxe", modality: "BOXE", type: "BOXE" },
+  // Jiu-Jitsu da manha
+  { startTime: "09:00", endTime: "10:00", title: "Jiu-Jitsu", modality: "JIU_JITSU", type: "ADULTO" },
+  // Boxe do fim da manha
+  { startTime: "10:00", endTime: "11:00", title: "Boxe", modality: "BOXE", type: "BOXE" },
+  { startTime: "11:00", endTime: "12:00", title: "Boxe", modality: "BOXE", type: "BOXE" },
+  // Boxe da tarde
+  { startTime: "16:00", endTime: "17:00", title: "Boxe", modality: "BOXE", type: "BOXE" },
+  // Jiu-Jitsu da tarde e noite
+  { startTime: "17:00", endTime: "18:00", title: "Jiu-Jitsu Adolescentes", modality: "JIU_JITSU", type: "ADOLESCENTE" },
+  { startTime: "18:00", endTime: "19:00", title: "Jiu-Jitsu Kids", modality: "JIU_JITSU", type: "KIDS" },
+  { startTime: "19:00", endTime: "20:00", title: "Jiu-Jitsu", modality: "JIU_JITSU", type: "ADULTO" },
+  // Boxe da noite
+  { startTime: "20:00", endTime: "21:00", title: "Boxe", modality: "BOXE", type: "BOXE" },
 ];
+
+const HORARIOS = DIAS_DE_AULA.flatMap((weekday) =>
+  AULAS_DO_DIA.map((aula) => ({ weekday, ...aula })),
+).concat([
+  // Jiu-Jitsu extra de sexta a noite
+  {
+    weekday: 5,
+    startTime: "20:30",
+    endTime: "22:00",
+    title: "Jiu-Jitsu",
+    modality: "JIU_JITSU",
+    type: "ADULTO",
+  },
+]);
 
 // Quantas aulas por semana cada turma tem. Usado para calibrar a chance de
 // presenca: quem treina numa turma com menos aulas precisa de chance maior por
@@ -111,8 +132,10 @@ type SeedStudent = {
   gradeAgeMonths: number;
   /** 0 a 1: quao assiduo ele e */
   consistency: number;
-  /** em qual turma ele treina (define de quais aulas recebe presenca) */
-  turma?: "ADULTO" | "ADOLESCENTE" | "KIDS";
+  /** o que ele treina: JIU_JITSU | BOXE | AMBOS */
+  modality?: string;
+  /** turmas que ele frequenta (define de quais aulas recebe presenca) */
+  turmas?: string[];
   competitor?: boolean;
   monthlyGoal?: number;
   phone?: string;
@@ -141,14 +164,25 @@ const ALUNOS: SeedStudent[] = [
   { name: "Marcelo Antunes", email: "marcelo@exemplo.com", belt: "BRANCA", degree: 2, gradeAgeMonths: 5, consistency: 0.31, phone: "(21) 98888-1015" },
 
   // Turmas infantil e de adolescentes, para exercitar a escada de 13 faixas
-  // Turma infantil (crianças) — faixas mais baixas, tempo de casa plausível
-  { name: "Miguel Ramos", email: "miguel@exemplo.com", belt: "INF_CINZA_PRETA", degree: 2, gradeAgeMonths: 3, consistency: 0.8, turma: "KIDS", monthlyGoal: 10, guardian: "Patrícia Ramos — (21) 98888-2001" },
-  { name: "Helena Duarte", email: "helena@exemplo.com", belt: "INF_CINZA", degree: 1, gradeAgeMonths: 2, consistency: 0.72, turma: "KIDS", monthlyGoal: 10, guardian: "Carlos Duarte — (21) 98888-2002" },
-  { name: "Isabela Freitas", email: "isabela@exemplo.com", belt: "INF_AMARELA_BRANCA", degree: 4, gradeAgeMonths: 4, consistency: 0.9, turma: "KIDS", monthlyGoal: 10, guardian: "Renata Freitas — (21) 98888-2003" },
-  // Turma de adolescentes — mais anos de casa, faixas mais altas
-  { name: "Enzo Martins", email: "enzo@exemplo.com", belt: "INF_AMARELA_PRETA", degree: 3, gradeAgeMonths: 3, consistency: 0.85, turma: "ADOLESCENTE", monthlyGoal: 10, competitor: true, guardian: "Sandra Martins — (21) 98888-2004" },
-  { name: "Sophia Nunes", email: "sophia@exemplo.com", belt: "INF_LARANJA_BRANCA", degree: 1, gradeAgeMonths: 2, consistency: 0.68, turma: "ADOLESCENTE", monthlyGoal: 10, guardian: "Marcos Nunes — (21) 98888-2005" },
-  { name: "Davi Carvalho", email: "davi@exemplo.com", belt: "INF_LARANJA_PRETA", degree: 4, gradeAgeMonths: 5, consistency: 0.76, turma: "ADOLESCENTE", monthlyGoal: 10, guardian: "Juliana Carvalho — (21) 98888-2006" },
+  // Turma infantil (crianças): faixas mais baixas, tempo de casa plausível
+  { name: "Miguel Ramos", email: "miguel@exemplo.com", belt: "INF_CINZA_PRETA", degree: 2, gradeAgeMonths: 3, consistency: 0.8, modality: "JIU_JITSU", turmas: ["KIDS"], monthlyGoal: 10, guardian: "Patrícia Ramos, (21) 98888-2001" },
+  { name: "Helena Duarte", email: "helena@exemplo.com", belt: "INF_CINZA", degree: 1, gradeAgeMonths: 2, consistency: 0.72, modality: "JIU_JITSU", turmas: ["KIDS"], monthlyGoal: 10, guardian: "Carlos Duarte, (21) 98888-2002" },
+  { name: "Isabela Freitas", email: "isabela@exemplo.com", belt: "INF_AMARELA_BRANCA", degree: 4, gradeAgeMonths: 4, consistency: 0.9, modality: "JIU_JITSU", turmas: ["KIDS"], monthlyGoal: 10, guardian: "Renata Freitas, (21) 98888-2003" },
+  // Turma de adolescentes: mais anos de casa, faixas mais altas
+  { name: "Enzo Martins", email: "enzo@exemplo.com", belt: "INF_AMARELA_PRETA", degree: 3, gradeAgeMonths: 3, consistency: 0.85, modality: "JIU_JITSU", turmas: ["ADOLESCENTE"], monthlyGoal: 10, competitor: true, guardian: "Sandra Martins, (21) 98888-2004" },
+  { name: "Sophia Nunes", email: "sophia@exemplo.com", belt: "INF_LARANJA_BRANCA", degree: 1, gradeAgeMonths: 2, consistency: 0.68, modality: "JIU_JITSU", turmas: ["ADOLESCENTE"], monthlyGoal: 10, guardian: "Marcos Nunes, (21) 98888-2005" },
+  { name: "Davi Carvalho", email: "davi@exemplo.com", belt: "INF_LARANJA_PRETA", degree: 4, gradeAgeMonths: 5, consistency: 0.76, modality: "JIU_JITSU", turmas: ["ADOLESCENTE"], monthlyGoal: 10, guardian: "Juliana Carvalho, (21) 98888-2006" },
+
+  // Turma de boxe. Não têm faixa nem graduação: o campo belt existe no banco
+  // mas nunca é mostrado para quem só treina boxe.
+  { name: "Rodrigo Peixoto", email: "rodrigo@exemplo.com", belt: "BRANCA", degree: 0, gradeAgeMonths: 6, consistency: 0.88, modality: "BOXE", turmas: ["BOXE"], monthlyGoal: 12, phone: "(21) 98888-3001" },
+  { name: "Aline Barros", email: "aline@exemplo.com", belt: "BRANCA", degree: 0, gradeAgeMonths: 4, consistency: 0.74, modality: "BOXE", turmas: ["BOXE"], monthlyGoal: 12, phone: "(21) 98888-3002" },
+  { name: "Wesley Amorim", email: "wesley@exemplo.com", belt: "BRANCA", degree: 0, gradeAgeMonths: 3, consistency: 0.62, modality: "BOXE", turmas: ["BOXE"], monthlyGoal: 10, phone: "(21) 98888-3003" },
+  { name: "Tatiane Lopes", email: "tatiane@exemplo.com", belt: "BRANCA", degree: 0, gradeAgeMonths: 2, consistency: 0.35, modality: "BOXE", turmas: ["BOXE"], monthlyGoal: 12, phone: "(21) 98888-3004" },
+
+  // Quem faz as duas modalidades: vê a grade inteira e tem faixa de Jiu-Jitsu.
+  { name: "Caio Bastos", email: "caio@exemplo.com", belt: "BRANCA", degree: 2, gradeAgeMonths: 3, consistency: 0.9, modality: "AMBOS", turmas: ["ADULTO", "BOXE"], monthlyGoal: 16, phone: "(21) 98888-3005" },
+  { name: "Priscila Mendes", email: "priscila@exemplo.com", belt: "AZUL", degree: 1, gradeAgeMonths: 5, consistency: 0.8, modality: "AMBOS", turmas: ["ADULTO", "BOXE"], monthlyGoal: 14, competitor: true, phone: "(21) 98888-3006" },
 ];
 
 const OBSERVACOES = [
@@ -303,7 +337,7 @@ async function main() {
     id: string;
     consistency: number;
     joinedAt: Date;
-    turma: string;
+    turmas: string[];
     meta: number;
   }[] = [];
 
@@ -331,6 +365,7 @@ async function main() {
         beltSinceAt,
         joinedAt,
         monthlyGoal: aluno.monthlyGoal ?? 12,
+        modality: aluno.modality ?? "JIU_JITSU",
         isCompetitor: aluno.competitor ?? false,
         phone: aluno.phone,
         guardianName: aluno.guardian,
@@ -372,7 +407,7 @@ async function main() {
       id: student.id,
       consistency: aluno.consistency,
       joinedAt,
-      turma: aluno.turma ?? "ADULTO",
+      turmas: aluno.turmas ?? ["ADULTO"],
       meta: aluno.monthlyGoal ?? 12,
     });
   }
@@ -397,6 +432,7 @@ async function main() {
         data: {
           date: atHour(dia, aula.startTime),
           title: `${aula.title} · ${aula.startTime}`,
+          modality: aula.modality,
           type: aula.type,
           scheduleId: schedule?.id,
           professorId: renato.id,
@@ -405,14 +441,20 @@ async function main() {
       });
       sessoes += 1;
 
-      // So entram nesta aula os alunos da turma dela. Cada um tem uma chance
-      // de estar presente, calibrada para a media cair perto da meta mensal.
-      const aulasPorSemana = AULAS_POR_SEMANA[aula.type] ?? 1;
+      // So entram nesta aula os alunos das turmas dela. Cada um tem uma chance
+      // de estar presente, calibrada para a media cair perto da meta mensal --
+      // dividida pelo total de aulas das turmas que ele frequenta, para quem
+      // faz duas modalidades nao aparecer com o dobro de treinos.
       const rows = [];
       for (const aluno of alunosCriados) {
-        if (aluno.turma !== aula.type) continue;
+        if (!aluno.turmas.includes(aula.type)) continue;
         if (dia < aluno.joinedAt) continue;
-        const chance = (aluno.consistency * aluno.meta) / (aulasPorSemana * 4.33);
+        const aulasPorSemana = aluno.turmas.reduce(
+          (soma, t) => soma + (AULAS_POR_SEMANA[t] ?? 0),
+          0,
+        );
+        const chance =
+          (aluno.consistency * aluno.meta) / (Math.max(1, aulasPorSemana) * 4.33);
         if (random() < chance) {
           rows.push({
             sessionId: session.id,
@@ -446,7 +488,7 @@ async function main() {
       title: "Copa Rio de Jiu-Jitsu 2026",
       type: "CAMPEONATO",
       startsAt: atHour(addMonths(hoje, 2), "08:00"),
-      location: "Tijuca Tênis Clube — Rio de Janeiro",
+      location: "Tijuca Tênis Clube, Rio de Janeiro",
       description:
         "Inscrições abertas para adulto e master, Gi e No-Gi. Fale com o professor Renato para acertar a categoria e o peso.",
     },
@@ -488,7 +530,7 @@ async function main() {
     data: {
       name: "Copa Rio de Jiu-Jitsu 2026",
       date: atHour(addMonths(hoje, -4), "08:00"),
-      location: "Tijuca Tênis Clube — Rio de Janeiro",
+      location: "Tijuca Tênis Clube, Rio de Janeiro",
       organizer: "FJJRIO",
       modality: "GI",
       imageUrl:
@@ -502,7 +544,7 @@ async function main() {
     data: {
       name: "Rio Winter No-Gi Open 2026",
       date: atHour(addMonths(hoje, -2), "09:00"),
-      location: "CEFAN — Rio de Janeiro",
+      location: "CEFAN, Rio de Janeiro",
       organizer: "CBJJD",
       modality: "NOGI",
       imageUrl:
@@ -516,7 +558,7 @@ async function main() {
       name: "Campeonato Estadual de Jiu-Jitsu 2026",
       date: atHour(addMonths(hoje, 2), "08:00"),
       endDate: atHour(addMonths(hoje, 2), "18:00"),
-      location: "Ginásio do Maracanãzinho — Rio de Janeiro",
+      location: "Ginásio do Maracanãzinho, Rio de Janeiro",
       organizer: "FJJRIO",
       modality: "AMBOS",
       registrationDeadline: atHour(addMonths(hoje, 1), "23:59"),
@@ -533,7 +575,7 @@ async function main() {
     data: {
       name: "Rio Spring International Open 2026",
       date: atHour(addMonths(hoje, 3), "08:00"),
-      location: "Rio de Janeiro — RJ",
+      location: "Rio de Janeiro, RJ",
       organizer: "CBJJ / IBJJF",
       modality: "GI",
       registrationDeadline: atHour(addMonths(hoje, 2), "23:59"),
@@ -592,7 +634,7 @@ async function main() {
   void futuro1;
 
   // -------------------------------------------------------------------------
-  // Financeiro (FICTICIO — valores de exemplo)
+  // Financeiro (FICTICIO: valores de exemplo)
   // -------------------------------------------------------------------------
   console.log("Criando planos e mensalidades...");
 
@@ -609,7 +651,7 @@ async function main() {
 
   const planoAdulto = await prisma.plan.create({
     data: {
-      name: "Adulto — livre",
+      name: "Adulto ilimitado",
       priceCents: 18000,
       description: "Todas as turmas de adulto da semana.",
       sortOrder: 0,
@@ -625,22 +667,37 @@ async function main() {
     },
   });
 
+  const planoBoxe = await prisma.plan.create({
+    data: {
+      name: "Boxe",
+      priceCents: 15000,
+      description: "Todas as turmas de boxe da semana.",
+      sortOrder: 2,
+    },
+  });
+
   // Associa cada aluno ao plano da turma dele
   for (const [i, aluno] of ALUNOS.entries()) {
     const criado = alunosCriados[i];
     if (!criado) continue;
-    const infantil = aluno.turma === "KIDS" || aluno.turma === "ADOLESCENTE";
+    const turmas = aluno.turmas ?? ["ADULTO"];
+    const soBoxe = aluno.modality === "BOXE";
+    const infantil = turmas.includes("KIDS") || turmas.includes("ADOLESCENTE");
     await prisma.student.update({
       where: { id: criado.id },
       data: {
-        planId: infantil ? planoInfantil.id : planoAdulto.id,
+        planId: soBoxe
+          ? planoBoxe.id
+          : infantil
+            ? planoInfantil.id
+            : planoAdulto.id,
         dueDay: 10,
       },
     });
   }
 
   // Três meses de mensalidades: os dois anteriores quitados, o atual em aberto
-  // com um pouco de tudo — para o professor ver a tela cheia de verdade.
+  // com um pouco de tudo, para o professor ver a tela cheia de verdade.
   const alunosComPlano = await prisma.student.findMany({
     where: { active: true },
     include: { plan: true, user: { select: { name: true } } },

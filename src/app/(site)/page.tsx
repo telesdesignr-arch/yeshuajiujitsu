@@ -54,31 +54,53 @@ export default async function HomePage() {
 
   // Agrupa a grade por dia da semana, começando na segunda-feira.
   const ordemDias = [1, 2, 3, 4, 5, 6, 0];
-  const grade = ordemDias
-    .map((weekday) => ({
-      weekday,
-      label: WEEKDAYS[weekday],
-      aulas: schedules.filter((s) => s.weekday === weekday),
-    }))
-    .filter((d) => d.aulas.length > 0);
+  const gradeDe = (modalidade: string) =>
+    ordemDias
+      .map((weekday) => ({
+        weekday,
+        label: WEEKDAYS[weekday],
+        aulas: schedules.filter(
+          (s) => s.weekday === weekday && s.modality === modalidade,
+        ),
+      }))
+      .filter((d) => d.aulas.length > 0);
+
+  const grades = [
+    { modalidade: "JIU_JITSU", titulo: "Jiu-Jitsu", dias: gradeDe("JIU_JITSU") },
+    { modalidade: "BOXE", titulo: "Boxe", dias: gradeDe("BOXE") },
+  ].filter((g) => g.dias.length > 0);
 
   return (
     <>
       {/* ==================================================================== */}
       {/* Hero                                                                 */}
       {/* ==================================================================== */}
-      <section className="bg-tatame px-4 pt-14 pb-16 text-white sm:px-6 sm:pt-20 sm:pb-24">
-        <div className="mx-auto max-w-6xl">
-          <h1 className="text-balance max-w-3xl font-display text-[3.25rem] leading-[0.92] font-bold tracking-wide uppercase sm:text-7xl lg:text-8xl">
+      <section className="bg-tatame relative overflow-hidden px-4 pt-14 pb-16 text-white sm:px-6 sm:pt-20 sm:pb-24">
+        {/* Faixa de marca no topo, no lugar de uma borda comum */}
+        <span aria-hidden className="rule-marca absolute inset-x-0 top-0" />
+
+        {/* Faixa preta gigante atravessando o fundo na diagonal. Fica quase
+            invisível, mas dá profundidade e é a única forma do logo. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-40 h-[34rem] w-[34rem] rotate-12 rounded-full border-[3rem] border-white/[0.035]"
+        />
+
+        <div className="cascata relative mx-auto max-w-6xl">
+          <p className="text-sm font-semibold tracking-[0.24em] text-brand-300 uppercase">
+            Rio de Janeiro · Jiu-Jitsu e boxe
+          </p>
+
+          <h1 className="text-balance mt-4 max-w-3xl font-display text-[3.25rem] leading-[0.92] font-bold tracking-wide uppercase sm:text-7xl lg:text-8xl">
             O tatame muda
             <br />
             <span className="text-brand-400">quem você é</span>
           </h1>
 
           <p className="mt-6 max-w-xl text-lg text-white/75">
-            Na Yeshua a gente treina Jiu-Jitsu de verdade — técnica, disciplina e
-            respeito — num ambiente onde ninguém é deixado para trás. Se é seu
-            primeiro dia ou sua décima faixa, tem lugar para você aqui.
+            Aqui tem Jiu-Jitsu e boxe, com o professor corrigindo aluno por
+            aluno. Não importa se hoje é seu primeiro dia ou se você já treina há
+            dez anos: tem lugar para você.
           </p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -138,16 +160,14 @@ export default async function HomePage() {
       {/* ==================================================================== */}
       <section id="aulas" className="scroll-mt-20 px-4 py-16 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          <p className="font-display text-sm font-bold tracking-[0.2em] text-brand-600 uppercase">
-            Como funciona
-          </p>
-          <h2 className="text-balance mt-2 max-w-2xl font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
+          <p className="eyebrow">Como funciona</p>
+          <h2 className="text-balance mt-3 max-w-2xl font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
             Você não precisa chegar pronto
           </h2>
           <p className="mt-4 max-w-2xl text-lg text-ink-500">
-            Todo mundo começa sem saber nada. A aula é montada para que o
-            iniciante aprenda no seu tempo e o veterano continue evoluindo — na
-            mesma hora, no mesmo tatame.
+            Todo mundo começa sem saber nada. A aula é montada para o iniciante
+            aprender no seu tempo enquanto o veterano continua evoluindo, na
+            mesma hora e no mesmo tatame.
           </p>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -170,7 +190,7 @@ export default async function HomePage() {
               {
                 icon: Sparkles,
                 title: "Sparring (opcional)",
-                text: "No fim da aula tem luta leve. Quem está começando pode só assistir nas primeiras semanas — e ninguém vai achar ruim.",
+                text: "No fim da aula tem luta leve. Quem está começando pode só assistir nas primeiras semanas. Ninguém vai achar ruim.",
               },
               {
                 icon: HeartHandshake,
@@ -183,7 +203,7 @@ export default async function HomePage() {
                 text: "Roupa de treino confortável, chinelo e uma garrafa de água. O kimono a gente empresta enquanto você experimenta.",
               },
             ].map((item) => (
-              <Card key={item.title}>
+              <Card key={item.title} className="card-hover">
                 <CardBody className="pt-5">
                   <span className="mb-3 inline-flex size-11 items-center justify-center rounded-[12px] bg-brand-50 text-brand-700">
                     <item.icon aria-hidden className="size-5" />
@@ -209,51 +229,73 @@ export default async function HomePage() {
         className="scroll-mt-20 border-y border-line bg-ink-100 px-4 py-16 sm:px-6 sm:py-24"
       >
         <div className="mx-auto max-w-6xl">
-          <p className="font-display text-sm font-bold tracking-[0.2em] text-brand-600 uppercase">
-            Grade da semana
-          </p>
-          <h2 className="mt-2 font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
+          <p className="eyebrow">Grade da semana</p>
+          <h2 className="mt-3 font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
             Horários das aulas
           </h2>
           <p className="mt-4 max-w-2xl text-lg text-ink-500">
             Chegue uns 10 minutos antes para trocar de roupa com calma. Se o
-            horário que você precisa não estiver aqui, fale com o professor —
-            sempre dá para achar um jeito.
+            horário que você precisa não estiver aqui, fale com o professor.
+            Quase sempre dá para achar um jeito.
           </p>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {grade.map((dia) => (
-              <Card key={dia.weekday}>
-                <CardBody className="pt-4">
-                  <h3 className="font-display text-lg font-bold tracking-[0.1em] uppercase">
-                    {dia.label}
-                  </h3>
-                  <ul className="mt-3 space-y-2.5">
-                    {dia.aulas.map((aula) => (
-                      <li
-                        key={aula.id}
-                        className="flex items-center justify-between gap-3 border-t border-line pt-2.5 first:border-0 first:pt-0"
-                      >
-                        <span>
-                          <span className="tabular block font-display text-base font-bold">
-                            {aula.startTime}
-                          </span>
-                          <span className="text-sm text-ink-500">{aula.title}</span>
-                        </span>
-                        <Badge tone={TURMAS_JOVENS.includes(aula.type) ? "brand" : "neutral"}>
-                          {classType(aula.type).short}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
+          {grades.map((g) => (
+            <div key={g.modalidade} className="mt-10">
+              <div className="mb-4 flex items-center gap-3">
+                <h3 className="font-display text-2xl font-bold tracking-wide uppercase">
+                  {g.titulo}
+                </h3>
+                <span aria-hidden className="h-px flex-1 bg-line" />
+                <span className="tabular text-sm text-ink-500">
+                  {g.dias.reduce((t, d) => t + d.aulas.length, 0)} aulas por semana
+                </span>
+              </div>
 
-          <p className="mt-6 text-sm text-ink-500">
-            Horários sujeitos a alteração em feriados e datas de competição. As
-            mudanças são sempre avisadas na área do aluno.
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {g.dias.map((dia) => (
+                  <Card key={dia.weekday} className="card-hover">
+                    <CardBody className="pt-4">
+                      <h4 className="font-display text-lg font-bold tracking-[0.1em] uppercase">
+                        {dia.label}
+                      </h4>
+                      <ul className="mt-3 space-y-2.5">
+                        {dia.aulas.map((aula) => (
+                          <li
+                            key={aula.id}
+                            className="flex items-center justify-between gap-3 border-t border-line pt-2.5 first:border-0 first:pt-0"
+                          >
+                            <span>
+                              <span className="tabular block font-display text-base font-bold">
+                                {aula.startTime}
+                              </span>
+                              <span className="text-sm text-ink-500">
+                                {aula.title}
+                              </span>
+                            </span>
+                            <Badge
+                              tone={
+                                TURMAS_JOVENS.includes(aula.type)
+                                  ? "brand"
+                                  : "neutral"
+                              }
+                            >
+                              {classType(aula.type).short}
+                            </Badge>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <p className="mt-8 max-w-2xl text-sm text-ink-500">
+            Entre meio-dia e 16h o tatame fica livre. Se esse for o único horário
+            que cabe na sua rotina, avise o professor que a gente abre a turma.
+            Em feriados e datas de competição a grade muda, e o aviso sai sempre
+            na área do aluno.
           </p>
         </div>
       </section>
@@ -265,26 +307,28 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="font-display text-sm font-bold tracking-[0.2em] text-brand-600 uppercase">
-                Graduação
-              </p>
-              <h2 className="mt-2 font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
+              <p className="eyebrow">Graduação</p>
+              <h2 className="mt-3 font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
                 Cada grau é um pedaço da sua história
               </h2>
               <p className="mt-4 text-lg text-ink-500">
-                No Jiu-Jitsu a evolução não é medida em meses — é medida em
-                presença. Cada faixa tem quatro graus, e cada grau vem quando o
-                professor vê que a técnica e a postura amadureceram.
+                No Jiu-Jitsu a graduação vem pela presença, não pelo calendário.
+                Cada faixa tem quatro graus, e o grau só sai quando o professor
+                vê que a técnica e a postura amadureceram.
               </p>
               <p className="mt-4 text-lg text-ink-500">
-                Quem tem até 15 anos segue a escada infantil, com treze faixas —
-                bem mais degraus, para a criança sentir que está avançando. Aos
-                16 anos, entra na escada adulta.
+                Quem tem até 15 anos segue a escada infantil, que tem treze
+                faixas. São mais degraus de propósito: a criança precisa sentir
+                que está avançando. Aos 16 anos ela passa para a escada adulta.
               </p>
               <p className="mt-4 text-lg text-ink-500">
                 Na área do aluno você acompanha tudo: quando recebeu cada
                 graduação, quem entregou, há quanto tempo está na faixa atual e o
                 que falta para o próximo passo.
+              </p>
+              <p className="mt-4 text-lg text-ink-500">
+                No boxe não existe faixa. Quem treina só boxe acompanha a
+                presença e a agenda pelo aplicativo do mesmo jeito.
               </p>
               <ButtonLink href="/login" size="lg" className="mt-7">
                 Ver minha evolução
@@ -325,14 +369,12 @@ export default async function HomePage() {
         className="scroll-mt-20 border-y border-line bg-ink-100 px-4 py-16 sm:px-6 sm:py-24"
       >
         <div className="mx-auto max-w-6xl">
-          <p className="font-display text-sm font-bold tracking-[0.2em] text-brand-600 uppercase">
-            Agenda
-          </p>
-          <h2 className="mt-2 font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
+          <p className="eyebrow">Agenda</p>
+          <h2 className="mt-3 font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
             O que vem por aí
           </h2>
           <p className="mt-4 max-w-2xl text-lg text-ink-500">
-            Campeonatos, graduações, seminários e os treinos especiais da equipe.
+            Os campeonatos, as graduações e os treinos especiais da equipe.
           </p>
 
           {/* Campeonatos */}
@@ -362,7 +404,7 @@ export default async function HomePage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 {campeonatos.map((c) => (
-                  <Card key={c.id} className="overflow-hidden">
+                  <Card key={c.id} className="card-hover overflow-hidden">
                     {c.imageUrl && (
                       <CompetitionImage
                         src={c.imageUrl}
@@ -420,7 +462,7 @@ export default async function HomePage() {
           ) : (
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               {events.map((evento) => (
-                <Card key={evento.id}>
+                <Card key={evento.id} className="card-hover">
                   <CardBody className="pt-5">
                     <EventTypeBadge type={evento.type} />
                     <h3 className="mt-3 font-display text-xl font-bold tracking-wide uppercase">
@@ -453,7 +495,8 @@ export default async function HomePage() {
       {/* Contato                                                              */}
       {/* ==================================================================== */}
       <section id="contato" className="scroll-mt-20 px-4 py-16 sm:px-6 sm:py-24">
-        <div className="bg-tatame mx-auto max-w-6xl rounded-[20px] px-6 py-14 text-center text-white sm:px-12 sm:py-20">
+        <div className="bg-tatame relative mx-auto max-w-6xl overflow-hidden rounded-[20px] px-6 py-14 text-center text-white sm:px-12 sm:py-20">
+          <span aria-hidden className="rule-marca absolute inset-x-0 top-0" />
           <h2 className="text-balance mx-auto max-w-2xl font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
             Sua primeira aula é por nossa conta
           </h2>

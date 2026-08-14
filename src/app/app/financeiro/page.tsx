@@ -83,8 +83,8 @@ export default async function FinanceiroDoAlunoPage() {
                 : `${emAberto.length} mensalidades em atraso`}
             </p>
             <p className="mt-1 text-sm text-ink-700">
-              Se já pagou e ainda está aparecendo assim, fale com o professor —
-              pode ser só a confirmação que faltou.
+              Se já pagou e ainda está aparecendo assim, fale com o professor.
+              Pode ser só a confirmação que faltou.
             </p>
           </CardBody>
         </Card>

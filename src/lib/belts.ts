@@ -196,7 +196,7 @@ export function nextStep(belt: string, degree: number): NextStep {
       kind: "FINAL",
       belt: current.key,
       degree: MAX_DEGREE,
-      label: "Faixa Preta 4º Grau — topo da escada",
+      label: "Faixa Preta 4º Grau, topo da escada",
       expectedMonths: null,
     };
   }

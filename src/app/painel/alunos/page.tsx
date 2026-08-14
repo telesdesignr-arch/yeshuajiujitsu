@@ -10,6 +10,11 @@ import { Avatar, Badge, EmptyState } from "@/components/ui/misc";
 import { graduationRank } from "@/lib/belts";
 import { requireStaff } from "@/lib/auth";
 import { formatDateShortYear } from "@/lib/dates";
+import {
+  filtroDeAlunosPorModalidade,
+  modalityLabel,
+  temGraduacao,
+} from "@/lib/modalities";
 import { prisma } from "@/lib/prisma";
 import { getStudentsSummary } from "@/lib/stats";
 import { cn } from "@/lib/utils";
@@ -20,15 +25,29 @@ export const dynamic = "force-dynamic";
 export default async function AlunosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; faixa?: string; status?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    faixa?: string;
+    status?: string;
+    modalidade?: string;
+  }>;
 }) {
   await requireStaff();
-  const { q = "", faixa = "", status = "ativos" } = await searchParams;
+  const {
+    q = "",
+    faixa = "",
+    status = "ativos",
+    modalidade = "",
+  } = await searchParams;
 
   const todos = await prisma.student.findMany({
     where: {
       ...(status === "todos" ? {} : { active: status !== "inativos" }),
       ...(faixa ? { belt: faixa } : {}),
+      // Quem filtra por Jiu-Jitsu quer ver também quem faz os dois.
+      ...(modalidade === "JIU_JITSU" || modalidade === "BOXE"
+        ? { modality: filtroDeAlunosPorModalidade(modalidade) }
+        : {}),
     },
     include: { user: { select: { name: true, email: true } } },
   });
@@ -91,6 +110,16 @@ export default async function AlunosPage({
           />
         </div>
         <Select
+          name="modalidade"
+          defaultValue={modalidade}
+          aria-label="Filtrar por modalidade"
+          className="w-auto min-w-[130px]"
+        >
+          <option value="">Todas as modalidades</option>
+          <option value="JIU_JITSU">Jiu-Jitsu</option>
+          <option value="BOXE">Boxe</option>
+        </Select>
+        <Select
           name="faixa"
           defaultValue={faixa}
           aria-label="Filtrar por faixa"
@@ -141,7 +170,18 @@ export default async function AlunosPage({
                         {!aluno.active && <Badge tone="neutral">Inativo</Badge>}
                       </span>
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <BeltChip belt={aluno.belt} degree={aluno.degree} size="sm" />
+                        {temGraduacao(aluno.modality) ? (
+                          <BeltChip
+                            belt={aluno.belt}
+                            degree={aluno.degree}
+                            size="sm"
+                          />
+                        ) : null}
+                        {aluno.modality !== "JIU_JITSU" && (
+                          <Badge tone="neutral">
+                            {modalityLabel(aluno.modality)}
+                          </Badge>
+                        )}
                         <span className="text-xs text-ink-500">
                           {r?.lastTrainingAt
                             ? `Treinou em ${formatDateShortYear(r.lastTrainingAt)}`
@@ -176,7 +216,7 @@ export default async function AlunosPage({
         ].map((s) => (
           <Link
             key={s.key}
-            href={`/painel/alunos?${new URLSearchParams({ q, faixa, status: s.key })}`}
+            href={`/painel/alunos?${new URLSearchParams({ q, faixa, modalidade, status: s.key })}`}
             className={cn(
               "rounded-pill border px-3.5 py-1.5 text-sm font-semibold transition-smooth",
               status === s.key

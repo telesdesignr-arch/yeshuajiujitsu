@@ -30,8 +30,9 @@ export default function LoginPage() {
             <span className="text-brand-400">no tatame</span>
           </h1>
           <p className="mt-5 max-w-md text-white/70">
-            Faixa, graus, frequência e histórico de graduações. Tudo que você
-            construiu na Yeshua, num lugar só.
+            Sua frequência, os horários da sua turma e, para quem faz Jiu-Jitsu,
+            a faixa e o histórico de graduações. Tudo o que você construiu na
+            Yeshua, num lugar só.
           </p>
         </div>
 
@@ -62,7 +63,7 @@ export default function LoginPage() {
             <div>
               <p className="text-sm text-ink-500">
                 Ainda não tem acesso? Chame o professor {ACADEMIA.professor} no
-                WhatsApp — ele libera na hora.
+                WhatsApp que ele libera na hora.
               </p>
               <a
                 href={whatsappLink(

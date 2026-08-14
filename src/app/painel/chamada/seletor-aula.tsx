@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Field, Select } from "@/components/ui/field";
 import { Input } from "@/components/ui/field";
 import { hojeISO } from "@/lib/dates";
+import { modalityLabel } from "@/lib/modalities";
 
 /**
  * Escolha da data e da aula. Ao mudar qualquer um dos dois recarregamos a
@@ -17,10 +18,14 @@ export function SeletorAula({
   date,
   scheduleId,
   aulas,
+  modalidade,
+  quantosAlunos,
 }: {
   date: string;
   scheduleId: string;
   aulas: { id: string; label: string }[];
+  modalidade?: string;
+  quantosAlunos?: number;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -75,6 +80,14 @@ export function SeletorAula({
           )}
         </div>
       </Field>
+
+      {modalidade && (
+        <p className="sm:col-span-2 -mt-1 text-xs text-ink-500">
+          Aula de <strong className="font-semibold">{modalityLabel(modalidade)}</strong>
+          {typeof quantosAlunos === "number" &&
+            ` · ${quantosAlunos} ${quantosAlunos === 1 ? "aluno treina" : "alunos treinam"} essa modalidade`}
+        </p>
+      )}
     </div>
   );
 }

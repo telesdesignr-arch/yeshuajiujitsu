@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Loader2, UserPlus } from "lucide-react";
 
@@ -10,6 +10,7 @@ import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/field";
 import { BeltSelectOptions } from "@/components/belt";
 import { MAX_DEGREE } from "@/lib/belts";
+import { MODALITY_OPTIONS } from "@/lib/modalities";
 import { hojeISO } from "@/lib/dates";
 
 function Salvar() {
@@ -36,6 +37,7 @@ export function AlunoForm() {
     createStudent,
     {},
   );
+  const [modalidade, setModalidade] = useState("JIU_JITSU");
   const hoje = hojeISO();
 
   return (
@@ -68,6 +70,27 @@ export function AlunoForm() {
             />
           </Field>
 
+          <Field
+            label="O que o aluno treina"
+            htmlFor="modality"
+            required
+            hint="Define o que ele enxerga no app. Quem só faz boxe não vê faixa nem graduação."
+          >
+            <Select
+              id="modality"
+              name="modality"
+              defaultValue="JIU_JITSU"
+              required
+              onChange={(e) => setModalidade(e.target.value)}
+            >
+              {MODALITY_OPTIONS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
           <Field label="Telefone / WhatsApp" htmlFor="phone">
             <Input
               id="phone"
@@ -96,7 +119,9 @@ export function AlunoForm() {
         </CardBody>
       </Card>
 
-      <Card>
+      {/* Boxe não tem faixa: o bloco inteiro some para quem só treina boxe,
+          em vez de aparecer vazio e confundir. */}
+      <Card className={modalidade === "BOXE" ? "hidden" : undefined}>
         <CardHeader>
           <CardTitle>Graduação atual</CardTitle>
         </CardHeader>

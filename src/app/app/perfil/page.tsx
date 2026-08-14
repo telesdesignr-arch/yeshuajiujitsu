@@ -16,6 +16,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
 import { Avatar, Badge, EmptyState } from "@/components/ui/misc";
 import { graduationLabel } from "@/lib/belts";
+import { modalityLabel, temGraduacao } from "@/lib/modalities";
 import { requireStudent } from "@/lib/auth";
 import { formatDateLong, humanDuration } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
@@ -67,7 +68,9 @@ export default async function PerfilPage() {
                 {student.user.name}
               </p>
               <p className="text-sm text-ink-500">
-                {graduationLabel(student.belt, student.degree)}
+                {temGraduacao(student.modality)
+                  ? graduationLabel(student.belt, student.degree)
+                  : modalityLabel(student.modality)}
               </p>
               {student.isCompetitor && (
                 <Badge tone="warning" className="mt-1.5">
@@ -78,9 +81,11 @@ export default async function PerfilPage() {
             </div>
           </div>
 
-          <div className="mt-5">
-            <BeltBar belt={student.belt} degree={student.degree} height={32} />
-          </div>
+          {temGraduacao(student.modality) && (
+            <div className="mt-5">
+              <BeltBar belt={student.belt} degree={student.degree} height={32} />
+            </div>
+          )}
         </CardBody>
       </Card>
 
@@ -104,7 +109,7 @@ export default async function PerfilPage() {
             ))}
           </dl>
           <p className="mt-4 border-t border-line pt-3 text-xs text-ink-500">
-            Algum dado errado? Fale com o professor — ele corrige pelo painel.
+            Algum dado errado? Fale com o professor que ele corrige pelo painel.
           </p>
         </CardBody>
       </Card>

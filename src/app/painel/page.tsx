@@ -19,7 +19,13 @@ import { BeltChip } from "@/components/belt";
 import { SenhaTemporaria } from "@/components/senha-temporaria";
 import { BarChart, DistributionBars } from "@/components/charts";
 import { ButtonLink } from "@/components/ui/button";
-import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardBody,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Avatar, Badge, EmptyState, Stat } from "@/components/ui/misc";
 import { beltsDaTrilha } from "@/lib/belts";
 import { requireStaff } from "@/lib/auth";
@@ -249,13 +255,20 @@ export default async function PainelHome() {
         <Card>
           <CardHeader>
             <CardTitle>Alunos por faixa</CardTitle>
+            <CardDescription>
+              {overview.alunosQueGraduam} no Jiu-Jitsu. Quem treina só boxe não
+              entra aqui, porque não tem faixa.
+            </CardDescription>
           </CardHeader>
           <CardBody>
             {/* Com as duas escadas somamos 18 faixas possíveis. Mostrar todas
                 deixaria a lista cheia de linhas zeradas, então só entram as
                 faixas que existem hoje na academia. */}
+            {/* O total aqui é só quem faz Jiu-Jitsu. Usar o total de alunos
+                ativos jogaria os percentuais para baixo, porque quem treina só
+                boxe não aparece em faixa nenhuma. */}
             <DistributionBars
-              total={overview.alunosAtivos}
+              total={overview.alunosQueGraduam}
               data={faixasComAlunos}
             />
             {faixasComAlunos.length === 0 && (

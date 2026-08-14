@@ -5,7 +5,7 @@ import { CalendarDays, ChevronRight, Clock, MapPin, Trophy } from "lucide-react"
 import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState } from "@/components/ui/misc";
-import { requireUser } from "@/lib/auth";
+import { getCurrentStudent, requireUser } from "@/lib/auth";
 import { modalityLabel } from "@/lib/competitions";
 import {
   WEEKDAYS,
@@ -14,6 +14,7 @@ import {
   formatDateShortYear,
   formatTime,
 } from "@/lib/dates";
+import { modalidadesDoAluno } from "@/lib/modalities";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Agenda" };
@@ -21,10 +22,17 @@ export const dynamic = "force-dynamic";
 
 export default async function AgendaPage() {
   await requireUser();
+  const student = await getCurrentStudent();
+
+  // O aluno vê só a grade da modalidade dele. Quem faz os dois vê tudo, e o
+  // professor (que não tem ficha de aluno) também.
+  const minhasModalidades = student
+    ? modalidadesDoAluno(student.modality)
+    : ["JIU_JITSU", "BOXE"];
 
   const [schedules, eventos, campeonatos] = await Promise.all([
     prisma.classSchedule.findMany({
-      where: { active: true },
+      where: { active: true, modality: { in: minhasModalidades } },
       orderBy: [{ weekday: "asc" }, { startTime: "asc" }],
     }),
     prisma.event.findMany({

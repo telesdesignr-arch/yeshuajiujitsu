@@ -50,7 +50,7 @@ export default async function GraduacoesPage() {
         </h1>
         <p className="text-sm text-ink-500">
           Quem está perto do próximo grau ou da próxima faixa. O sistema só
-          sugere — a decisão é sempre sua.
+          sugere. A decisão é sempre sua.
         </p>
         <p className="mt-1 text-xs text-ink-500">
           A frequência mostrada aqui é a dos últimos 3 meses fechados, não a do

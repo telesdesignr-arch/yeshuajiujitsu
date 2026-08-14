@@ -241,7 +241,7 @@ export default async function CampeonatoPage({
                         <Medal placement={r.placement} size={30} />
                       ) : (
                         <span className="tabular text-sm font-bold text-ink-300">
-                          {r.placement > 0 ? `${r.placement}º` : "—"}
+                          {r.placement > 0 ? `${r.placement}º` : "sem pódio"}
                         </span>
                       )}
                     </span>
