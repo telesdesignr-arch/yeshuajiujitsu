@@ -3,6 +3,11 @@
 Site e sistema de gestão da academia **Yeshua Jiu-Jitsu** — *Jiu-Jitsu com Cristo*.
 Professor responsável: Renato Pierre.
 
+**No ar:** https://yeshuajiujitsu-eight.vercel.app
+
+> O sistema está publicado com **dados de exemplo** (15 alunos fictícios).
+> Quando os dados reais da academia chegarem, apagamos tudo e começamos limpo.
+
 ---
 
 ## O que já está pronto (Versão 1)
