@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Trophy,
   Users,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,9 +28,11 @@ const ITEMS: Item[] = [
   { href: "/painel/agenda", label: "Agenda", icon: CalendarDays },
 ];
 
-// No computador sobra espaco na lateral, entao Campeonatos aparece direto.
+// No computador sobra espaco na lateral, entao Financeiro e Campeonatos
+// aparecem direto.
 const ITEMS_LATERAL: Item[] = [
   ...ITEMS,
+  { href: "/painel/financeiro", label: "Financeiro", icon: Wallet },
   { href: "/painel/campeonatos", label: "Campeonatos", icon: Trophy },
 ];
 

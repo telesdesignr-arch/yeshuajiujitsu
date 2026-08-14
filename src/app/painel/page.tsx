@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   ArrowRight,
   CalendarCheck,
+  ChevronRight,
   ClipboardCheck,
   Flame,
   GraduationCap,
@@ -10,6 +11,7 @@ import {
   Trophy,
   UserPlus,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import { BeltChip } from "@/components/belt";
@@ -20,6 +22,8 @@ import { Avatar, Badge, EmptyState, Stat } from "@/components/ui/misc";
 import { beltsDaTrilha } from "@/lib/belts";
 import { requireStaff } from "@/lib/auth";
 import { formatDateShortYear, humanDuration } from "@/lib/dates";
+import { mesAtual, nomeDoMes, situacao } from "@/lib/finance";
+import { formatMoney } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 import {
   getAcademyOverview,
@@ -60,6 +64,21 @@ export default async function PainelHome() {
     .slice(0, 5);
 
   const prontos = candidatos.filter((c) => c.pronto);
+
+  // Resumo financeiro do mês corrente
+  const mensalidades = await prisma.invoice.findMany({
+    where: { referenceMonth: mesAtual(), status: { not: "CANCELADO" } },
+    select: { status: true, dueDate: true, amountCents: true, discountCents: true },
+  });
+
+  const financeiro = {
+    total: mensalidades.length,
+    pagas: mensalidades.filter((m) => m.status === "PAGO").length,
+    atrasadas: mensalidades.filter((m) => situacao(m) === "ATRASADO").length,
+    recebido: mensalidades
+      .filter((m) => m.status === "PAGO")
+      .reduce((s, m) => s + m.amountCents - m.discountCents, 0),
+  };
 
   // Distribuição por faixa: adultos primeiro, depois infantil, sem as faixas
   // que não têm ninguém.
@@ -117,6 +136,39 @@ export default async function PainelHome() {
           icon={Trophy}
         />
       </div>
+
+      {/* Financeiro do mês */}
+      <Link href="/painel/financeiro" className="block">
+        <Card className="transition-smooth hover:opacity-90">
+          <CardBody className="flex flex-wrap items-center gap-4 pt-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-700">
+              <Wallet aria-hidden className="size-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base font-bold tracking-wide uppercase">
+                Financeiro de {nomeDoMes(mesAtual())}
+              </span>
+              <span className="block text-xs text-ink-500">
+                {financeiro.total === 0
+                  ? "Nenhuma mensalidade lançada neste mês"
+                  : `${financeiro.pagas} de ${financeiro.total} mensalidades quitadas`}
+              </span>
+            </span>
+            <span className="text-right">
+              <span className="tabular block font-display text-xl leading-none font-bold">
+                {formatMoney(financeiro.recebido)}
+              </span>
+              <span className="block text-xs text-ink-500">recebido</span>
+            </span>
+            {financeiro.atrasadas > 0 && (
+              <Badge tone="danger">
+                {financeiro.atrasadas} em atraso
+              </Badge>
+            )}
+            <ChevronRight aria-hidden className="size-4 shrink-0 text-ink-300" />
+          </CardBody>
+        </Card>
+      </Link>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Frequência da academia */}

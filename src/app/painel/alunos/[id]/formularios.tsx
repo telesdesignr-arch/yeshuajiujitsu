@@ -10,6 +10,8 @@ import {
   updateStudent,
   type ActionState,
 } from "@/actions/painel";
+import { updateStudentFinance } from "@/actions/financeiro";
+import { formatMoney, formatMoneyInput } from "@/lib/money";
 import { BeltBar, BeltSelectOptions } from "@/components/belt";
 import { Button } from "@/components/ui/button";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/field";
@@ -208,6 +210,101 @@ export function NotaForm({ studentId }: { studentId: string }) {
         loading="Salvando..."
         icon={MessageSquarePlus}
       />
+    </form>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Financeiro do aluno                                                         */
+/* -------------------------------------------------------------------------- */
+
+export function FinanceiroAlunoForm({
+  studentId,
+  planId,
+  dueDay,
+  customFeeCents,
+  financialNotes,
+  planos,
+}: {
+  studentId: string;
+  planId: string | null;
+  dueDay: number;
+  customFeeCents: number | null;
+  financialNotes: string | null;
+  planos: { id: string; name: string; priceCents: number }[];
+}) {
+  const [state, formAction] = useActionState<ActionState, FormData>(
+    updateStudentFinance,
+    {},
+  );
+
+  return (
+    <form action={formAction} className="space-y-4" noValidate>
+      <input type="hidden" name="studentId" value={studentId} />
+
+      {state.error && <FormAlert>{state.error}</FormAlert>}
+      {state.success && <FormAlert tone="success">{state.success}</FormAlert>}
+
+      {planos.length === 0 && (
+        <p className="rounded-[8px] bg-warning/10 px-3 py-2 text-sm text-warning">
+          Nenhum plano cadastrado ainda. Crie um em Financeiro antes de associar
+          o aluno.
+        </p>
+      )}
+
+      <Field label="Plano" htmlFor="fin-plano">
+        <Select id="fin-plano" name="planId" defaultValue={planId ?? ""}>
+          <option value="">Sem plano</option>
+          {planos.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} — {formatMoney(p.priceCents)}
+            </option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field
+        label="Dia do vencimento"
+        htmlFor="fin-dia"
+        hint="De 1 a 28. Fevereiro não tem dia 29 todo ano, por isso o limite."
+      >
+        <Input
+          id="fin-dia"
+          name="dueDay"
+          type="number"
+          min={1}
+          max={28}
+          defaultValue={dueDay}
+        />
+      </Field>
+
+      <Field
+        label="Valor personalizado"
+        htmlFor="fin-valor"
+        hint="Deixe vazio para usar o valor do plano. Preencha só para bolsa ou desconto combinado."
+      >
+        <Input
+          id="fin-valor"
+          name="customFee"
+          inputMode="decimal"
+          defaultValue={
+            customFeeCents !== null ? formatMoneyInput(customFeeCents) : ""
+          }
+          placeholder="Ex.: 120,00"
+        />
+      </Field>
+
+      <Field label="Observações financeiras" htmlFor="fin-obs">
+        <Textarea
+          id="fin-obs"
+          name="financialNotes"
+          rows={2}
+          defaultValue={financialNotes ?? ""}
+          placeholder="Ex.: irmão do Pedro, desconto de 20% combinado."
+        />
+      </Field>
+
+      <Enviar label="Salvar" loading="Salvando..." icon={Save} />
     </form>
   );
 }

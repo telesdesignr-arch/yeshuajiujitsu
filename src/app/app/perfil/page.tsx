@@ -8,6 +8,7 @@ import {
   Phone,
   Trophy,
   UserRound,
+  Wallet,
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
@@ -139,6 +140,20 @@ export default async function PerfilPage() {
           <CardTitle>Conta</CardTitle>
         </CardHeader>
         <CardBody className="space-y-1">
+          <Link
+            href="/app/financeiro"
+            className="flex min-h-[48px] items-center gap-3 rounded-[10px] px-2 font-semibold transition-smooth hover:bg-ink-100"
+          >
+            <Wallet aria-hidden className="size-4 text-ink-500" />
+            Minha mensalidade
+          </Link>
+          <Link
+            href="/app/campeonatos"
+            className="flex min-h-[48px] items-center gap-3 rounded-[10px] px-2 font-semibold transition-smooth hover:bg-ink-100"
+          >
+            <Trophy aria-hidden className="size-4 text-ink-500" />
+            Meus campeonatos
+          </Link>
           <Link
             href="/trocar-senha"
             className="flex min-h-[48px] items-center gap-3 rounded-[10px] px-2 font-semibold transition-smooth hover:bg-ink-100"

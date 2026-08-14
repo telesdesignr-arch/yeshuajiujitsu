@@ -254,6 +254,8 @@ async function main() {
   await prisma.graduation.deleteMany();
   await prisma.competitionResult.deleteMany();
   await prisma.competition.deleteMany();
+  await prisma.invoice.deleteMany();
+  await prisma.plan.deleteMany();
   await prisma.student.deleteMany();
   await prisma.classSchedule.deleteMany();
   await prisma.event.deleteMany();
@@ -588,6 +590,111 @@ async function main() {
 
   console.log(`  ${registrados} resultados de campeonato`);
   void futuro1;
+
+  // -------------------------------------------------------------------------
+  // Financeiro (FICTICIO — valores de exemplo)
+  // -------------------------------------------------------------------------
+  console.log("Criando planos e mensalidades...");
+
+  await prisma.academySettings.upsert({
+    where: { id: "unica" },
+    create: {
+      id: "unica",
+      pixKey: "5521987059207",
+      pixOwnerName: "Renato Pierre",
+      defaultDueDay: 10,
+    },
+    update: {},
+  });
+
+  const planoAdulto = await prisma.plan.create({
+    data: {
+      name: "Adulto — livre",
+      priceCents: 18000,
+      description: "Todas as turmas de adulto da semana.",
+      sortOrder: 0,
+    },
+  });
+
+  const planoInfantil = await prisma.plan.create({
+    data: {
+      name: "Infantil e adolescente",
+      priceCents: 14000,
+      description: "Turmas de crianças e adolescentes, 3x por semana.",
+      sortOrder: 1,
+    },
+  });
+
+  // Associa cada aluno ao plano da turma dele
+  for (const [i, aluno] of ALUNOS.entries()) {
+    const criado = alunosCriados[i];
+    if (!criado) continue;
+    const infantil = aluno.turma === "KIDS" || aluno.turma === "ADOLESCENTE";
+    await prisma.student.update({
+      where: { id: criado.id },
+      data: {
+        planId: infantil ? planoInfantil.id : planoAdulto.id,
+        dueDay: 10,
+      },
+    });
+  }
+
+  // Três meses de mensalidades: os dois anteriores quitados, o atual em aberto
+  // com um pouco de tudo — para o professor ver a tela cheia de verdade.
+  const alunosComPlano = await prisma.student.findMany({
+    where: { active: true },
+    include: { plan: true, user: { select: { name: true } } },
+  });
+
+  let mensalidadesCriadas = 0;
+  for (let atras = 2; atras >= 0; atras--) {
+    const ref = addMonths(hoje, -atras);
+    const referenceMonth = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, "0")}`;
+
+    for (const [i, aluno] of alunosComPlano.entries()) {
+      const valor = aluno.customFeeCents ?? aluno.plan?.priceCents ?? 0;
+      if (valor === 0) continue;
+
+      const vencimento = atHour(
+        new Date(ref.getFullYear(), ref.getMonth(), aluno.dueDay),
+        "12:00",
+      );
+
+      let status = "PAGO";
+      let paidAt: Date | null = atHour(
+        new Date(ref.getFullYear(), ref.getMonth(), Math.max(1, aluno.dueDay - 2)),
+        "10:00",
+      );
+
+      if (atras === 0) {
+        // Mês corrente: mistura de situações
+        const sorte = (i + 1) % 5;
+        if (sorte === 0) {
+          status = "EM_ANALISE";
+          paidAt = null;
+        } else if (sorte === 1 || sorte === 2) {
+          status = "PENDENTE";
+          paidAt = null;
+        }
+      }
+
+      await prisma.invoice.create({
+        data: {
+          studentId: aluno.id,
+          referenceMonth,
+          dueDate: vencimento,
+          amountCents: valor,
+          status,
+          paidAt,
+          paymentMethod: status === "PAGO" ? "PIX" : null,
+          confirmedById: status === "PAGO" ? renato.id : null,
+        },
+      });
+      mensalidadesCriadas += 1;
+    }
+  }
+
+  console.log(`  ${mensalidadesCriadas} mensalidades`);
 
   console.log("");
   console.log("Pronto!");

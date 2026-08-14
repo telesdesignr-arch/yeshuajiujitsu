@@ -15,9 +15,15 @@ import {
   Trash2,
   Trophy,
   User,
+  Wallet,
 } from "lucide-react";
 
-import { EditarAlunoForm, GraduacaoForm, NotaForm } from "./formularios";
+import {
+  EditarAlunoForm,
+  FinanceiroAlunoForm,
+  GraduacaoForm,
+  NotaForm,
+} from "./formularios";
 import { deleteNote } from "@/actions/painel";
 import { AttendanceCalendar } from "@/components/attendance-calendar";
 import { BeltBar } from "@/components/belt";
@@ -42,6 +48,8 @@ import {
   humanDuration,
 } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
+import { SITUACAO_INFO, nomeDoMes, situacao } from "@/lib/finance";
+import { formatMoney } from "@/lib/money";
 import { getStudentStats } from "@/lib/stats";
 import { firstName, pluralize } from "@/lib/utils";
 
@@ -71,21 +79,33 @@ export default async function AlunoPage({
   const { id } = await params;
   const { novo } = await searchParams;
 
-  const student = await prisma.student.findUnique({
-    where: { id },
-    include: {
-      user: true,
-      professor: { select: { name: true } },
-      graduations: {
-        include: { awardedBy: { select: { name: true } } },
-        orderBy: { date: "desc" },
+  const [student, planos, mensalidades] = await Promise.all([
+    prisma.student.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        plan: true,
+        professor: { select: { name: true } },
+        graduations: {
+          include: { awardedBy: { select: { name: true } } },
+          orderBy: { date: "desc" },
+        },
+        journal: {
+          include: { author: { select: { name: true } } },
+          orderBy: { date: "desc" },
+        },
       },
-      journal: {
-        include: { author: { select: { name: true } } },
-        orderBy: { date: "desc" },
-      },
-    },
-  });
+    }),
+    prisma.plan.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.invoice.findMany({
+      where: { studentId: id, status: { not: "CANCELADO" } },
+      orderBy: { referenceMonth: "desc" },
+      take: 6,
+    }),
+  ]);
 
   if (!student) notFound();
 
@@ -288,6 +308,64 @@ export default async function AlunoPage({
         icon={MessageSquarePlus}
       >
         <NotaForm studentId={student.id} />
+      </Collapsible>
+
+      <Collapsible
+        title="Financeiro"
+        description={
+          student.plan
+            ? `${student.plan.name} · vence dia ${student.dueDay}`
+            : "Sem plano associado"
+        }
+        icon={Wallet}
+      >
+        <FinanceiroAlunoForm
+          studentId={student.id}
+          planId={student.planId}
+          dueDay={student.dueDay}
+          customFeeCents={student.customFeeCents}
+          financialNotes={student.financialNotes}
+          planos={planos.map((p) => ({
+            id: p.id,
+            name: p.name,
+            priceCents: p.priceCents,
+          }))}
+        />
+
+        {mensalidades.length > 0 && (
+          <div className="mt-5 border-t border-line pt-4">
+            <p className="mb-2 text-xs font-semibold tracking-wide text-ink-500 uppercase">
+              Últimas mensalidades
+            </p>
+            <ul className="space-y-1.5">
+              {mensalidades.map((m) => {
+                const info = SITUACAO_INFO[situacao(m)];
+                return (
+                  <li
+                    key={m.id}
+                    className="flex items-center justify-between gap-2 text-sm"
+                  >
+                    <span className="first-letter:uppercase">
+                      {nomeDoMes(m.referenceMonth)}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="tabular font-semibold">
+                        {formatMoney(m.amountCents - m.discountCents)}
+                      </span>
+                      <Badge tone={info.tone}>{info.label}</Badge>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <Link
+              href="/painel/financeiro"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-800"
+            >
+              Abrir o financeiro
+            </Link>
+          </div>
+        )}
       </Collapsible>
 
       <Collapsible

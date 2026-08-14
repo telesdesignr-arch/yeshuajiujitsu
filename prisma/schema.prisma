@@ -36,6 +36,7 @@ model User {
   sessionsTaught     AttendanceSession[] @relation("SessionProfessor")
   schedulesTaught    ClassSchedule[]     @relation("ScheduleProfessor")
   notesAuthored      StudentNote[]       @relation("NoteAuthor")
+  paymentsConfirmed  Invoice[]           @relation("PagamentoConfirmado")
 
   @@index([role])
 }
@@ -67,10 +68,20 @@ model Student {
   emergencyContact String?
   observations     String?
 
+  // Financeiro
+  planId         String?
+  plan           Plan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
+  // Dia do vencimento (1 a 28). 28 e o limite para existir em fevereiro.
+  dueDay         Int     @default(10)
+  // Valor proprio, quando o aluno tem desconto ou bolsa. Vazio = usa o plano.
+  customFeeCents Int?
+  financialNotes String?
+
   graduations  Graduation[]
   attendances  Attendance[]
   journal      StudentNote[]
   results      CompetitionResult[]
+  invoices     Invoice[]
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -187,6 +198,87 @@ model Event {
   createdAt   DateTime  @default(now())
 
   @@index([startsAt])
+}
+
+// ---------------------------------------------------------------------------
+// Financeiro
+// ---------------------------------------------------------------------------
+//
+// TODO VALOR EM DINHEIRO E GUARDADO EM CENTAVOS, como numero inteiro.
+// Guardar 149.90 como decimal parece mais natural, mas numero quebrado no
+// computador acumula erro de arredondamento -- e em dinheiro isso vira
+// diferenca de centavos no fechamento do mes. R$ 149,90 aqui e 14990.
+
+// Plano de mensalidade da academia. Ex.: "Adulto 3x por semana".
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  priceCents  Int
+  description String?
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  students Student[]
+
+  @@index([active])
+}
+
+// Uma mensalidade de um aluno num mes.
+model Invoice {
+  id        String  @id @default(cuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // Mes de competencia, no formato "2026-08". Texto e nao data de proposito:
+  // "a mensalidade de agosto" e um mes do calendario, nao um instante, entao
+  // nao pode escorregar por fuso horario.
+  referenceMonth String
+  dueDate        DateTime
+
+  // Valor copiado do plano no momento em que a mensalidade foi gerada.
+  // Se o plano mudar de preco depois, as mensalidades antigas nao mudam.
+  amountCents   Int
+  discountCents Int @default(0)
+
+  // PENDENTE | EM_ANALISE | PAGO | CANCELADO
+  // "ATRASADO" nao e guardado: e calculado (pendente + venceu). Assim nao
+  // depende de nenhuma rotina rodar na hora certa para ficar correto.
+  status String @default("PENDENTE")
+
+  paidAt        DateTime?
+  paymentMethod String? // PIX | DINHEIRO | CARTAO | TRANSFERENCIA | OUTRO
+  notes         String?
+
+  // Quem confirmou o pagamento no sistema
+  confirmedById String?
+  confirmedBy   User?   @relation("PagamentoConfirmado", fields: [confirmedById], references: [id], onDelete: SetNull)
+
+  // Reservado para o intermediador de pagamento (Mercado Pago). Ainda nao
+  // usado: fica aqui para a integracao entrar sem migracao de banco depois.
+  externalId       String?
+  externalStatus   String?
+  paymentUrl       String?
+  qrCode           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Um aluno tem no maximo uma mensalidade por mes. Isso e o que impede a
+  // geracao em lote de duplicar cobranca se for rodada duas vezes.
+  @@unique([studentId, referenceMonth])
+  @@index([status, dueDate])
+  @@index([referenceMonth])
+}
+
+// Configuracoes da academia. Tabela de uma linha so.
+model AcademySettings {
+  id            String   @id @default("unica")
+  pixKey        String?
+  pixOwnerName  String?
+  defaultDueDay Int      @default(10)
+  updatedAt     DateTime @updatedAt
 }
 
 // ---------------------------------------------------------------------------

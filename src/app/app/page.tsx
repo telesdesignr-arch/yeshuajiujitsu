@@ -7,6 +7,7 @@ import {
   Swords,
   Target,
   TrendingUp,
+  Wallet,
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
@@ -14,6 +15,8 @@ import { EventTypeBadge } from "@/components/event-type";
 import { Card, CardBody, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState, Progress, Stat } from "@/components/ui/misc";
 import { graduationLabel, nextStep } from "@/lib/belts";
+import { SITUACAO_INFO, mesAtual, nomeDoMes, situacao } from "@/lib/finance";
+import { formatMoney } from "@/lib/money";
 import { requireStudent } from "@/lib/auth";
 import {
   formatDateLong,
@@ -32,7 +35,7 @@ export default async function AppHome() {
   const stats = await getStudentStats(student);
   const proximo = nextStep(student.belt, student.degree);
 
-  const [eventos, ultimosTreinos] = await Promise.all([
+  const [eventos, ultimosTreinos, mensalidade] = await Promise.all([
     prisma.event.findMany({
       where: { startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
@@ -43,6 +46,14 @@ export default async function AppHome() {
       include: { session: true },
       orderBy: { date: "desc" },
       take: 3,
+    }),
+    // A mensalidade do mês corrente, para o aviso da tela inicial.
+    prisma.invoice.findFirst({
+      where: {
+        studentId: student.id,
+        referenceMonth: mesAtual(),
+        status: { not: "CANCELADO" },
+      },
     }),
   ]);
 
@@ -181,6 +192,41 @@ export default async function AppHome() {
           )}
         </CardBody>
       </Card>
+
+      {/* Mensalidade */}
+      {mensalidade && (
+        <Link href="/app/financeiro" className="block">
+          <Card
+            className={
+              situacao(mensalidade) === "ATRASADO"
+                ? "border-danger/30 bg-danger/5 transition-smooth hover:opacity-85"
+                : "transition-smooth hover:opacity-85"
+            }
+          >
+            <CardBody className="flex items-center gap-3 pt-4">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-700">
+                <Wallet aria-hidden className="size-4.5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-semibold tracking-[0.16em] text-ink-500 uppercase">
+                  Mensalidade de {nomeDoMes(mensalidade.referenceMonth)}
+                </span>
+                <span className="tabular block font-display text-xl leading-tight font-bold">
+                  {formatMoney(
+                    mensalidade.amountCents - mensalidade.discountCents,
+                  )}
+                </span>
+                <span className="block text-xs text-ink-500">
+                  Vence em {formatDateShort(mensalidade.dueDate)}
+                </span>
+              </span>
+              <Badge tone={SITUACAO_INFO[situacao(mensalidade)].tone}>
+                {SITUACAO_INFO[situacao(mensalidade)].label}
+              </Badge>
+            </CardBody>
+          </Card>
+        </Link>
+      )}
 
       {/* Próximos eventos */}
       <section>
