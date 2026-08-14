@@ -12,17 +12,23 @@
    ========================================================================== */
 
 @theme {
-  /* ---- Marrom da marca (base: o marrom da cruz do logo) ---- */
-  --color-brand-50: #faf6f1;
-  --color-brand-100: #f2e9de;
-  --color-brand-200: #e4d2bf;
-  --color-brand-300: #d0b393;
-  --color-brand-400: #b98d63;
-  --color-brand-500: #9c6b3e;
-  --color-brand-600: #7f5430; /* primaria: 6.5:1 sobre branco */
-  --color-brand-700: #653f24;
-  --color-brand-800: #4c2f1b;
-  --color-brand-900: #2e1c10;
+  /* ---- Marrom da marca ----
+     A cor 600 e o marrom exato da cruz no logo vetorizado da academia
+     (#73401d). Toda a escala foi construida a partir dela.
+     Contraste da 600 sobre branco: 8.5:1 -- passa com folga em AAA. */
+  --color-brand-50: #faf6f2;
+  --color-brand-100: #f1e7db;
+  --color-brand-200: #e0cab2;
+  --color-brand-300: #c8a581;
+  --color-brand-400: #a97b4e;
+  --color-brand-500: #8a5628;
+  --color-brand-600: #73401d; /* marrom oficial do logo */
+  --color-brand-700: #5d3317;
+  --color-brand-800: #452612;
+  --color-brand-900: #2a170b;
+
+  /* ---- Vermelho da ponta da faixa, tirado do logo ---- */
+  --color-brand-red: #e52521;
 
   /* ---- Preto / neutros quentes ---- */
   --color-ink: #14100d;
@@ -142,8 +148,8 @@ a,
 .bg-tatame {
   background-color: var(--color-ink);
   background-image:
-    radial-gradient(circle at 18% 12%, rgb(156 107 62 / 0.28), transparent 55%),
-    radial-gradient(circle at 82% 88%, rgb(127 84 48 / 0.22), transparent 50%);
+    radial-gradient(circle at 18% 12%, rgb(138 86 40 / 0.30), transparent 55%),
+    radial-gradient(circle at 82% 88%, rgb(115 64 29 / 0.26), transparent 50%);
 }
 
 /* Animacao de entrada dos cartoes (curta, 220ms, ease-out) */

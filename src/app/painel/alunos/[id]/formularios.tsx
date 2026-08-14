@@ -144,7 +144,7 @@ export function GraduacaoForm({
                 type="checkbox"
                 name="criterio"
                 value={c}
-                className="size-4 cursor-pointer accent-[#7f5430]"
+                className="size-4 cursor-pointer accent-brand-600"
               />
               {c}
             </label>
@@ -193,7 +193,7 @@ export function NotaForm({ studentId }: { studentId: string }) {
         <input
           type="checkbox"
           name="visibleToStudent"
-          className="size-5 cursor-pointer accent-[#7f5430]"
+          className="size-5 cursor-pointer accent-brand-600"
         />
         <span className="text-sm font-semibold">
           Mostrar esta observação para o aluno
@@ -303,7 +303,7 @@ export function EditarAlunoForm({
           type="checkbox"
           name="isCompetitor"
           defaultChecked={student.isCompetitor}
-          className="size-5 cursor-pointer accent-[#7f5430]"
+          className="size-5 cursor-pointer accent-brand-600"
         />
         <span className="text-sm font-semibold">Atleta competidor</span>
       </label>
@@ -313,7 +313,7 @@ export function EditarAlunoForm({
           type="checkbox"
           name="active"
           defaultChecked={student.active}
-          className="size-5 cursor-pointer accent-[#7f5430]"
+          className="size-5 cursor-pointer accent-brand-600"
         />
         <span className="text-sm font-semibold">
           Aluno ativo

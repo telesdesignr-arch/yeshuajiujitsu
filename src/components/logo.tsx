@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 /**
  * Marca da academia.
  *
- * Hoje usa /public/logo.svg, que e uma reconstrucao do emblema.
- * Assim que o arquivo original chegar, basta salvar por cima de
- * public/logo.svg (ou trocar o caminho aqui para /logo.png).
+ * public/logo.svg e o vetor oficial da academia (Illustrator, 1080x1080).
+ * Os arquivos originais ficam guardados em /marca, inclusive o PDF para uso
+ * em impressao. Para trocar a marca um dia, basta salvar por cima do SVG.
  */
 export function Logo({
   size = 40,

@@ -154,7 +154,7 @@ export function AlunoForm() {
             <input
               type="checkbox"
               name="isCompetitor"
-              className="size-5 cursor-pointer accent-[#7f5430]"
+              className="size-5 cursor-pointer accent-brand-600"
             />
             <span className="text-sm font-semibold">
               Atleta competidor

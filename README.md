@@ -69,16 +69,16 @@ Cada item abaixo está marcado no código e é rápido de mudar:
 |-------|---------|
 | Endereço da academia | `src/lib/academia.ts` |
 | WhatsApp e Instagram | `src/lib/academia.ts` |
-| Logo oficial | salvar por cima de `public/logo.svg` |
+| Logo oficial | pronto — `public/logo.svg` |
 | Horários das aulas | pelo próprio sistema, em `/painel/agenda` |
 | Alunos | pelo próprio sistema, em `/painel/alunos/novo` |
 | Tempo esperado entre graus | `src/lib/belts.ts` |
 
 ### Sobre a logo
 
-O arquivo `public/logo.svg` é uma **reconstrução** do emblema da academia,
-feita para o sistema não ficar sem marca. Quando você mandar o arquivo
-original, ele substitui esse.
+`public/logo.svg` é o vetor oficial da academia. Os arquivos originais estão
+guardados em `marca/` — o SVG e o PDF (este último para impressão). O marrom
+da marca (`#73401d`) foi tirado direto do vetor e é a base de toda a paleta.
 
 ---
 
@@ -149,7 +149,7 @@ sugestões — quem gradua é sempre o professor.
 
 | Uso | Cor |
 |-----|-----|
-| Marrom da marca | `#7f5430` |
+| Marrom da marca (do vetor) | `#73401d` |
 | Preto | `#14100d` |
 | Branco | `#ffffff` |
 | Faixa azul / roxa / marrom / preta | `#1e4b8f` `#5b2c87` `#6b4423` `#111111` |
