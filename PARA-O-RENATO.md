@@ -77,17 +77,18 @@ marcar:
 
 # 2. Financeiro
 
-O módulo está pronto, mas com valores inventados.
-
 ## Planos e valores
 
-| Plano | Valor hoje no sistema |
-|---|---|
-| Adulto — livre | R$ 180,00 |
-| Infantil e adolescente | R$ 140,00 |
+O sistema está com **um plano só: "Mensalidade", R$ 90,00**, valendo para
+Jiu-Jitsu e boxe, adulto e criança.
 
-**Quais são os planos e valores reais?** Se houver mais planos (2x por semana,
-só No-Gi, plano família), me diga o nome e o valor de cada um.
+**Duas perguntas:**
+
+1. Quem treina Jiu-Jitsu **e** boxe paga os mesmos R$ 90, ou paga mais?
+2. Criança e adolescente pagam o mesmo valor do adulto?
+
+Se em algum caso o valor for diferente, é só me dizer que eu crio o plano
+separado (ou o senhor mesmo cria, no Financeiro do painel).
 
 ## Descontos
 
@@ -233,8 +234,12 @@ E-mail da academia?**
 
 ## Aula experimental
 
-O site promete "sua primeira aula é por nossa conta". **Confere?** Se a regra
-for outra (uma semana grátis, aula paga avulsa), corrijo o texto.
+O site anuncia que **a primeira aula é grátis, no Jiu-Jitsu e no boxe**, e diz
+que kimono e luva a academia empresta. Está certo assim?
+
+Uma dúvida que ficou: **o site deve mostrar o valor da mensalidade (R$ 90)?**
+Hoje não mostra. Tem academia que prefere falar de preço só na conversa, e
+tem academia em que mostrar ajuda a filtrar quem liga.
 
 ---
 

@@ -634,7 +634,10 @@ async function main() {
   void futuro1;
 
   // -------------------------------------------------------------------------
-  // Financeiro (FICTICIO: valores de exemplo)
+  // Financeiro
+  //
+  // O valor da mensalidade (R$ 90) e real, informado pela academia. Os alunos
+  // e as mensalidades geradas abaixo continuam FICTICIOS.
   // -------------------------------------------------------------------------
   console.log("Criando planos e mensalidades...");
 
@@ -649,50 +652,23 @@ async function main() {
     update: {},
   });
 
-  const planoAdulto = await prisma.plan.create({
+  // Um valor unico para toda a academia: R$ 90, Jiu-Jitsu ou boxe, adulto ou
+  // crianca. Se um dia a academia cobrar diferente por turma, o professor cria
+  // outro plano pelo painel -- nao precisa mexer aqui.
+  const plano = await prisma.plan.create({
     data: {
-      name: "Adulto ilimitado",
-      priceCents: 18000,
-      description: "Todas as turmas de adulto da semana.",
+      name: "Mensalidade",
+      priceCents: 9000,
+      description: "Jiu-Jitsu e boxe, todas as turmas da semana.",
       sortOrder: 0,
     },
   });
 
-  const planoInfantil = await prisma.plan.create({
-    data: {
-      name: "Infantil e adolescente",
-      priceCents: 14000,
-      description: "Turmas de crianças e adolescentes, 3x por semana.",
-      sortOrder: 1,
-    },
-  });
-
-  const planoBoxe = await prisma.plan.create({
-    data: {
-      name: "Boxe",
-      priceCents: 15000,
-      description: "Todas as turmas de boxe da semana.",
-      sortOrder: 2,
-    },
-  });
-
-  // Associa cada aluno ao plano da turma dele
-  for (const [i, aluno] of ALUNOS.entries()) {
-    const criado = alunosCriados[i];
+  for (const criado of alunosCriados) {
     if (!criado) continue;
-    const turmas = aluno.turmas ?? ["ADULTO"];
-    const soBoxe = aluno.modality === "BOXE";
-    const infantil = turmas.includes("KIDS") || turmas.includes("ADOLESCENTE");
     await prisma.student.update({
       where: { id: criado.id },
-      data: {
-        planId: soBoxe
-          ? planoBoxe.id
-          : infantil
-            ? planoInfantil.id
-            : planoAdulto.id,
-        dueDay: 10,
-      },
+      data: { planId: plano.id, dueDay: 10 },
     });
   }
 

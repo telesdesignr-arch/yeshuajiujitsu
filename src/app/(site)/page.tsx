@@ -126,6 +126,11 @@ export default async function HomePage() {
             </ButtonLink>
           </div>
 
+          <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-brand-300">
+            <BadgeCheck aria-hidden className="size-4 shrink-0" />
+            A primeira aula é grátis, no Jiu-Jitsu e no boxe
+          </p>
+
           <dl className="mt-14 grid max-w-2xl grid-cols-3 gap-4 border-t border-white/12 pt-8">
             <div>
               <dt className="text-xs font-semibold tracking-wide text-white/50 uppercase">
@@ -200,7 +205,7 @@ export default async function HomePage() {
               {
                 icon: Shirt,
                 title: "O que levar no primeiro dia",
-                text: "Roupa de treino confortável, chinelo e uma garrafa de água. O kimono a gente empresta enquanto você experimenta.",
+                text: "Roupa de treino confortável, chinelo e uma garrafa de água. Kimono e luva a gente empresta, e essa primeira aula não custa nada.",
               },
             ].map((item) => (
               <Card key={item.title} className="card-hover">
@@ -501,9 +506,9 @@ export default async function HomePage() {
             Sua primeira aula é por nossa conta
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/75">
-            Manda uma mensagem para o professor {ACADEMIA.professor}, conta um
-            pouco de você e a gente marca o melhor dia para você conhecer o
-            tatame.
+            Vale para o Jiu-Jitsu e para o boxe. Manda uma mensagem para o
+            professor {ACADEMIA.professor}, conta um pouco de você e a gente
+            marca o melhor dia para você conhecer o tatame.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
