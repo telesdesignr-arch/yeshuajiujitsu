@@ -55,12 +55,7 @@ export default async function HomePage() {
       {/* ==================================================================== */}
       <section className="bg-tatame px-4 pt-14 pb-16 text-white sm:px-6 sm:pt-20 sm:pb-24">
         <div className="mx-auto max-w-6xl">
-          <Badge tone="brand" className="border-brand-400/30 bg-white/10 text-brand-300">
-            <Sparkles aria-hidden className="size-3.5" />
-            {ACADEMIA.lema}
-          </Badge>
-
-          <h1 className="text-balance mt-5 max-w-3xl font-display text-[3.25rem] leading-[0.92] font-bold tracking-wide uppercase sm:text-7xl lg:text-8xl">
+          <h1 className="text-balance max-w-3xl font-display text-[3.25rem] leading-[0.92] font-bold tracking-wide uppercase sm:text-7xl lg:text-8xl">
             O tatame muda
             <br />
             <span className="text-brand-400">quem você é</span>
