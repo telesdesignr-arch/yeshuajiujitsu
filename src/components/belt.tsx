@@ -63,64 +63,52 @@ export function BeltBar({
 
   const stripes = Math.max(0, Math.min(MAX_DEGREE, degree));
 
-  // Geometria (viewBox 300 x 56)
-  const H = 56;
-  const listraY = 20;
-  const listraH = 16;
-  const tipStart = 176;
-  const tipEnd = 276;
-  const grauW = 9;
-  const grauGap = 8;
+  // A faixa e montada com elementos reais, e nao com um SVG esticado.
+  //
+  // Antes o desenho era um SVG com preserveAspectRatio="none", esticado para
+  // preencher a largura. O problema: o mesmo grau saia com proporcao 1:6 no
+  // celular e 1:2,7 num cartao largo -- ou seja, gordo e quadrado onde havia
+  // espaco sobrando. Aqui a espessura e o espacamento dos graus sao medidos em
+  // pixels a partir da altura da faixa, entao a proporcao nunca muda.
+  const grauW = Math.max(3, Math.round(height * 0.15));
+  const grauGap = Math.max(4, Math.round(height * 0.22));
+  const grauMargem = Math.max(5, Math.round(height * 0.3));
 
   return (
-    <div className={cn("w-full", className)}>
-      <svg
-        viewBox={`0 0 300 ${H}`}
-        preserveAspectRatio="none"
-        style={{ height, width: "100%" }}
-        role="img"
-        aria-label={graduationLabel(belt, degree)}
+    <div
+      className={cn(
+        "relative w-full overflow-hidden rounded-[2px] ring-1 ring-inset",
+        className,
+      )}
+      style={{ height, background: info.color, ["--tw-ring-color" as string]: outline }}
+      role="img"
+      aria-label={graduationLabel(belt, degree)}
+    >
+      {/* listra central, de ponta a ponta */}
+      {info.stripe && (
+        <span
+          aria-hidden
+          className="absolute inset-x-0"
+          style={{ background: info.stripe, top: "33%", height: "34%" }}
+        />
+      )}
+
+      {/* ponteira, com os graus cobrindo-a de cima a baixo */}
+      <span
+        aria-hidden
+        className="absolute inset-y-0 flex items-stretch justify-end"
+        style={{
+          left: "70%",
+          right: "10%",
+          background: tipColor,
+          gap: grauGap,
+          paddingRight: grauMargem,
+        }}
       >
-        {/* corpo da faixa */}
-        <rect x="0" y="0" width="300" height={H} fill={info.color} />
-
-        {/* listra central, de ponta a ponta */}
-        {info.stripe && (
-          <rect x="0" y={listraY} width="300" height={listraH} fill={info.stripe} />
-        )}
-
-        {/* ponteira */}
-        <rect
-          x={tipStart}
-          y="0"
-          width={tipEnd - tipStart}
-          height={H}
-          fill={tipColor}
-        />
-
-        {/* graus, contados da ponta para dentro */}
         {Array.from({ length: stripes }).map((_, i) => (
-          <rect
-            key={i}
-            x={tipEnd - 14 - grauW - i * (grauW + grauGap)}
-            y="7"
-            width={grauW}
-            height={H - 14}
-            fill="#ffffff"
-          />
+          <span key={i} style={{ width: grauW, background: "#ffffff" }} />
         ))}
-
-        {/* contorno */}
-        <rect
-          x="0.5"
-          y="0.5"
-          width="299"
-          height={H - 1}
-          fill="none"
-          stroke={outline}
-          strokeWidth="1"
-        />
-      </svg>
+      </span>
     </div>
   );
 }
