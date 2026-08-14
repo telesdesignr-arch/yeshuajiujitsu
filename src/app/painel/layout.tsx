@@ -6,6 +6,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { Wordmark } from "@/components/logo";
 import { Avatar } from "@/components/ui/misc";
 import { requireStaff } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export default async function PainelLayout({
   children,
@@ -13,6 +14,16 @@ export default async function PainelLayout({
   children: React.ReactNode;
 }) {
   const session = await requireStaff();
+
+  // "Ver como aluno" so aparece para quem tem ficha de aluno. Sem ela, a area
+  // do aluno nao tem o que mostrar e devolvia a pessoa para o painel em
+  // silencio -- botao que nao faz nada e pior que botao que nao existe.
+  const temFichaDeAluno = Boolean(
+    await prisma.student.findUnique({
+      where: { userId: session.userId },
+      select: { id: true },
+    }),
+  );
 
   return (
     <div className="min-h-dvh bg-ink-100/70">
@@ -23,13 +34,15 @@ export default async function PainelLayout({
             <Wordmark size={32} />
           </Link>
           <div className="flex items-center gap-1">
-            <Link
-              href="/app"
-              className="inline-flex items-center gap-1.5 rounded-pill border border-line px-3 py-1.5 text-xs font-semibold text-ink-500 transition-smooth hover:bg-ink-100 hover:text-ink"
-            >
-              <Smartphone aria-hidden className="size-3.5" />
-              Ver como aluno
-            </Link>
+            {temFichaDeAluno && (
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-1.5 rounded-pill border border-line px-3 py-1.5 text-xs font-semibold text-ink-500 transition-smooth hover:bg-ink-100 hover:text-ink"
+              >
+                <Smartphone aria-hidden className="size-3.5" />
+                Ver como aluno
+              </Link>
+            )}
             <LogoutButton
               label=""
               className="size-11 justify-center text-ink-500 hover:text-danger"
@@ -57,13 +70,15 @@ export default async function PainelLayout({
                 </p>
               </div>
             </div>
-            <Link
-              href="/app"
-              className="mb-1 flex min-h-[40px] items-center gap-3 rounded-[10px] px-3 text-sm font-semibold text-ink-500 transition-smooth hover:bg-ink-100 hover:text-ink"
-            >
-              <Smartphone aria-hidden className="size-4" />
-              Ver como aluno
-            </Link>
+            {temFichaDeAluno && (
+              <Link
+                href="/app"
+                className="mb-1 flex min-h-[40px] items-center gap-3 rounded-[10px] px-3 text-sm font-semibold text-ink-500 transition-smooth hover:bg-ink-100 hover:text-ink"
+              >
+                <Smartphone aria-hidden className="size-4" />
+                Ver como aluno
+              </Link>
+            )}
             <LogoutButton className="min-h-[40px] w-full justify-start gap-3 rounded-[10px] px-3 text-danger hover:bg-danger/8" />
           </div>
         </aside>
