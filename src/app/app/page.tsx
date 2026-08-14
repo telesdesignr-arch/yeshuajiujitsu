@@ -41,7 +41,7 @@ export default async function AppHome() {
     prisma.attendance.findMany({
       where: { studentId: student.id, present: true },
       include: { session: true },
-      orderBy: { session: { date: "desc" } },
+      orderBy: { date: "desc" },
       take: 3,
     }),
   ]);

@@ -318,7 +318,12 @@ async function main() {
         if (dia < aluno.joinedAt) continue;
         const chance = (aluno.consistency * 12) / (aulasPorSemana * 4.33);
         if (random() < chance) {
-          rows.push({ sessionId: session.id, studentId: aluno.id, present: true });
+          rows.push({
+            sessionId: session.id,
+            studentId: aluno.id,
+            present: true,
+            date: session.date,
+          });
         }
       }
       if (rows.length > 0) {

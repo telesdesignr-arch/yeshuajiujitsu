@@ -53,12 +53,42 @@ export async function getSession(): Promise<SessionPayload | null> {
 /**
  * Exige um usuario logado. Se nao houver, manda para o login.
  * Tambem forca a troca de senha no primeiro acesso.
+ *
+ * O cookie de sessao vale 30 dias, entao conferimos a conta no banco a cada
+ * acesso. Sem isso, desmarcar "Aluno ativo" no painel nao tiraria o acesso de
+ * quem ja esta logado -- o aluno continuaria entrando por ate um mes. E uma
+ * consulta por chave primaria, custa quase nada.
  */
 export async function requireUser(): Promise<SessionPayload> {
   const session = await getSession();
   if (!session) redirect("/login");
-  if (session.mustChangePassword) redirect("/trocar-senha");
-  return session;
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      active: true,
+      mustChangePassword: true,
+    },
+  });
+
+  // Conta apagada ou desativada: manda limpar o cookie e voltar ao login.
+  if (!user || !user.active) redirect("/sair");
+
+  if (user.mustChangePassword) redirect("/trocar-senha");
+
+  // Devolvemos os dados do banco, e nao os do cookie: assim uma troca de nome
+  // ou de papel vale na hora, sem precisar sair e entrar de novo.
+  return {
+    userId: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role as Role,
+    mustChangePassword: false,
+  };
 }
 
 /** Exige professor ou administrador. */

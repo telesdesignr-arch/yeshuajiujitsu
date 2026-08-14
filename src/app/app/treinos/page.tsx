@@ -48,10 +48,10 @@ export default async function TreinosPage({
       where: {
         studentId: student.id,
         present: true,
-        session: { date: { gte: inicio, lte: fim } },
+        date: { gte: inicio, lte: fim },
       },
       include: { session: true },
-      orderBy: { session: { date: "desc" } },
+      orderBy: { date: "desc" },
     }),
     prisma.attendanceSession.findMany({
       where: { date: { gte: inicio, lte: fim } },

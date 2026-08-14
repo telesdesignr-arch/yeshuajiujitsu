@@ -155,10 +155,21 @@ model Attendance {
   studentId String
   student   Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
   present   Boolean           @default(true)
+
+  // Copia da data da aula (AttendanceSession.date).
+  //
+  // Sim, e informacao repetida -- de proposito. Sem ela, toda contagem de
+  // frequencia vira um JOIN com a tabela de aulas, e descobrir "qual foi o
+  // ultimo treino de cada aluno" obriga a carregar todas as presencas da
+  // academia na memoria. Com esta coluna, essas perguntas viram um indice.
+  // Quem escreve as duas datas juntas e a acao de salvar a chamada.
+  date      DateTime
+
   createdAt DateTime          @default(now())
 
   @@unique([sessionId, studentId])
-  @@index([studentId])
+  @@index([studentId, date])
+  @@index([date])
 }
 
 // Eventos avulsos da agenda: campeonato, graduacao, seminario, confraternizacao.

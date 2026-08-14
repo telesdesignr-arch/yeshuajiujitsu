@@ -249,6 +249,8 @@ export async function saveAttendance(
         sessionId: session.id,
         studentId,
         present: true,
+        // mesma data da aula: e o que faz as contas de frequencia serem rapidas
+        date: session.date,
       })),
     }),
   ]);

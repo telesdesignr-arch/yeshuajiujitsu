@@ -120,15 +120,17 @@ export async function getStudentStats(student: {
       select: { date: true },
       orderBy: { date: "desc" },
     }),
+    // Aqui carregamos as datas de um aluno so (algumas centenas de linhas),
+    // porque a sequencia de semanas precisa do historico completo dele.
     prisma.attendance.findMany({
       where: { studentId: student.id, present: true },
-      select: { session: { select: { date: true } } },
-      orderBy: { session: { date: "desc" } },
+      select: { date: true },
+      orderBy: { date: "desc" },
     }),
     prisma.attendance.count({ where: { studentId: student.id, present: true } }),
   ]);
 
-  const attendedDates = attendances.map((a) => a.session.date);
+  const attendedDates = attendances.map((a) => a.date);
   const attendedDayKeys = Array.from(new Set(attendedDates.map(dayKey)));
   const academyDayKeys = Array.from(new Set(sessions.map((s) => dayKey(s.date))));
 
@@ -202,13 +204,15 @@ export async function getStudentsSummary(
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
 
+  // As tres perguntas viram tres agregacoes feitas pelo banco. Nenhuma linha
+  // de presenca chega a trafegar ate aqui -- so os numeros ja somados.
   const [monthRows, totalRows, lastRows] = await Promise.all([
     prisma.attendance.groupBy({
       by: ["studentId"],
       where: {
         studentId: { in: ids },
         present: true,
-        session: { date: { gte: monthStart, lte: monthEnd } },
+        date: { gte: monthStart, lte: monthEnd },
       },
       _count: { _all: true },
     }),
@@ -217,19 +221,18 @@ export async function getStudentsSummary(
       where: { studentId: { in: ids }, present: true },
       _count: { _all: true },
     }),
-    prisma.attendance.findMany({
+    prisma.attendance.groupBy({
+      by: ["studentId"],
       where: { studentId: { in: ids }, present: true },
-      select: { studentId: true, session: { select: { date: true } } },
-      orderBy: { session: { date: "desc" } },
+      _max: { date: true },
     }),
   ]);
 
   const monthMap = new Map(monthRows.map((r) => [r.studentId, r._count._all]));
   const totalMap = new Map(totalRows.map((r) => [r.studentId, r._count._all]));
-  const lastMap = new Map<string, Date>();
-  for (const row of lastRows) {
-    if (!lastMap.has(row.studentId)) lastMap.set(row.studentId, row.session.date);
-  }
+  const lastMap = new Map(
+    lastRows.flatMap((r) => (r._max.date ? [[r.studentId, r._max.date] as const] : [])),
+  );
 
   const result = new Map<string, StudentSummary>();
   for (const s of students) {
@@ -281,10 +284,7 @@ export async function getAcademyOverview(): Promise<AcademyOverview> {
         where: { joinedAt: { gte: monthStart, lte: monthEnd } },
       }),
       prisma.attendance.count({
-        where: {
-          present: true,
-          session: { date: { gte: monthStart, lte: monthEnd } },
-        },
+        where: { present: true, date: { gte: monthStart, lte: monthEnd } },
       }),
       prisma.attendanceSession.count({
         where: { date: { gte: monthStart, lte: monthEnd } },
@@ -322,7 +322,7 @@ export async function getAcademyOverview(): Promise<AcademyOverview> {
     if (parcial) metaProporcionalAtual = metaAjustada;
 
     const presencas = await prisma.attendance.count({
-      where: { present: true, session: { date: { gte: start, lte: end } } },
+      where: { present: true, date: { gte: start, lte: end } },
     });
 
     historico.push({
@@ -392,7 +392,7 @@ export async function getGraduationCandidates(): Promise<GraduationCandidate[]> 
     where: {
       studentId: { in: students.map((s) => s.id) },
       present: true,
-      session: { date: { gte: inicioJanela, lte: fimJanela } },
+      date: { gte: inicioJanela, lte: fimJanela },
     },
     _count: { _all: true },
   });
