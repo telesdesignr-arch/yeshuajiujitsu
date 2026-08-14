@@ -79,6 +79,11 @@ export default async function EvolucaoPage() {
         </p>
       </div>
 
+      {/* No computador: à esquerda onde você está, à direita como chegou até
+          aqui. */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
+
       {/* Faixa atual */}
       <Card className="border-ink bg-ink text-white">
         <CardBody className="pt-5">
@@ -158,6 +163,36 @@ export default async function EvolucaoPage() {
         </CardBody>
       </Card>
 
+      {/* Tempo em cada faixa */}
+      {porFaixa.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Tempo em cada faixa</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <ul className="space-y-3">
+              {porFaixa.map((f) => (
+                <li
+                  key={f.belt}
+                  className="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-0 last:pb-0"
+                >
+                  <BeltChip belt={f.belt} degree={0} size="sm" />
+                  <span className="text-right">
+                    <span className="block text-sm font-semibold">{f.duracao}</span>
+                    <span className="block text-xs text-ink-500">
+                      {f.atual ? "em andamento" : "concluída"}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardBody>
+        </Card>
+      )}
+
+      </div>
+      <div className="space-y-6">
+
       {/* Linha do tempo */}
       <section>
         <SectionTitle>Linha do tempo</SectionTitle>
@@ -217,33 +252,6 @@ export default async function EvolucaoPage() {
         )}
       </section>
 
-      {/* Tempo em cada faixa */}
-      {porFaixa.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Tempo em cada faixa</CardTitle>
-          </CardHeader>
-          <CardBody>
-            <ul className="space-y-3">
-              {porFaixa.map((f) => (
-                <li
-                  key={f.belt}
-                  className="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-0 last:pb-0"
-                >
-                  <BeltChip belt={f.belt} degree={0} size="sm" />
-                  <span className="text-right">
-                    <span className="block text-sm font-semibold">{f.duracao}</span>
-                    <span className="block text-xs text-ink-500">
-                      {f.atual ? "em andamento" : "concluída"}
-                    </span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardBody>
-        </Card>
-      )}
-
       {/* Escada completa */}
       <Card>
         <CardHeader>
@@ -281,6 +289,9 @@ export default async function EvolucaoPage() {
           </ul>
         </CardBody>
       </Card>
+
+      </div>
+      </div>
     </div>
   );
 }

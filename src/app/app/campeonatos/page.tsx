@@ -68,6 +68,9 @@ export default async function CampeonatosDoAlunoPage() {
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
+
       {/* Perfil do atleta */}
       <Card className="border-ink bg-ink text-white">
         <CardBody className="pt-5">
@@ -199,6 +202,9 @@ export default async function CampeonatosDoAlunoPage() {
         )}
       </section>
 
+      </div>
+      <div className="space-y-6">
+
       {/* Próximos campeonatos */}
       <section>
         <SectionTitle>Próximos campeonatos</SectionTitle>
@@ -277,6 +283,9 @@ export default async function CampeonatosDoAlunoPage() {
 
       {/* Calendários oficiais */}
       <Federacoes />
+
+      </div>
+      </div>
     </div>
   );
 }

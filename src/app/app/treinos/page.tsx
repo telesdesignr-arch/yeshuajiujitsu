@@ -80,6 +80,9 @@ export default async function TreinosPage({
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
+
       {/* Calendário */}
       <Card>
         <CardHeader className="flex items-center justify-between gap-2 pb-3">
@@ -161,6 +164,9 @@ export default async function TreinosPage({
         </CardBody>
       </Card>
 
+      </div>
+      <div className="space-y-6">
+
       {/* Lista de treinos do mês */}
       <section>
         <SectionTitle>Histórico do mês</SectionTitle>
@@ -206,6 +212,9 @@ export default async function TreinosPage({
           </Card>
         )}
       </section>
+
+      </div>
+      </div>
     </div>
   );
 }

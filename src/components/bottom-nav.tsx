@@ -7,7 +7,9 @@ import {
   House,
   Swords,
   TrendingUp,
+  Trophy,
   UserRound,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -15,6 +17,8 @@ import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 
+// Menu do celular: 5 itens, o limite antes de os alvos ficarem estreitos
+// demais para o dedo.
 const ITEMS: Item[] = [
   { href: "/app", label: "Início", icon: House, exact: true },
   { href: "/app/treinos", label: "Treinos", icon: Swords },
@@ -23,13 +27,58 @@ const ITEMS: Item[] = [
   { href: "/app/perfil", label: "Perfil", icon: UserRound },
 ];
 
+// No computador a barra lateral e vertical e cabe mais: mensalidade e
+// campeonatos saem de dentro do Perfil e ficam a um clique.
+const ITEMS_LATERAL: Item[] = [
+  ...ITEMS.slice(0, 4),
+  { href: "/app/campeonatos", label: "Campeonatos", icon: Trophy },
+  { href: "/app/financeiro", label: "Mensalidade", icon: Wallet },
+  ITEMS[4],
+];
+
+function useIsActive() {
+  const pathname = usePathname();
+  return (item: Item) =>
+    item.exact ? pathname === item.href : pathname.startsWith(item.href);
+}
+
+/** Barra lateral, usada no computador. */
+export function AlunoSidebarNav() {
+  const isActive = useIsActive();
+
+  return (
+    <nav aria-label="Navegação principal" className="space-y-1">
+      {ITEMS_LATERAL.map((item) => {
+        const active = isActive(item);
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex min-h-[44px] items-center gap-3 rounded-[10px] px-3 font-semibold transition-smooth",
+              active
+                ? "bg-ink text-white"
+                : "text-ink-500 hover:bg-ink-100 hover:text-ink",
+            )}
+          >
+            <Icon aria-hidden className="size-[18px]" />
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur-md lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex max-w-lg">

@@ -63,13 +63,18 @@ export default async function AppHome() {
     <div className="space-y-6">
       {/* Saudação */}
       <div>
-        <h1 className="font-display text-3xl font-bold tracking-wide uppercase">
+        <h1 className="font-display text-3xl font-bold tracking-wide uppercase lg:text-4xl">
           Olá, {firstName(student.user.name)}
         </h1>
         <p className="text-sm text-ink-500 first-letter:uppercase">
           {formatDateLong(new Date())}
         </p>
       </div>
+
+      {/* No computador o conteúdo se abre em duas colunas: à esquerda a
+          evolução, à direita o que exige atenção (mensalidade, agenda). */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
 
       {/* Cartão da faixa */}
       <Card className="overflow-hidden border-ink bg-ink text-white">
@@ -192,6 +197,9 @@ export default async function AppHome() {
           )}
         </CardBody>
       </Card>
+
+      </div>
+      <div className="space-y-6">
 
       {/* Mensalidade */}
       {mensalidade && (
@@ -323,6 +331,9 @@ export default async function AppHome() {
           </Card>
         )}
       </section>
+
+      </div>
+      </div>
     </div>
   );
 }

@@ -59,6 +59,9 @@ export default async function AgendaPage() {
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
+
       {/* Campeonatos */}
       <section>
         <SectionTitle
@@ -172,6 +175,9 @@ export default async function AgendaPage() {
         )}
       </section>
 
+      </div>
+      <div className="space-y-6">
+
       {/* Grade fixa */}
       <section>
         <SectionTitle>Horários da semana</SectionTitle>
@@ -209,6 +215,9 @@ export default async function AgendaPage() {
           ))}
         </div>
       </section>
+
+      </div>
+      </div>
     </div>
   );
 }

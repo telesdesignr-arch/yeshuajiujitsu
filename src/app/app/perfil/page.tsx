@@ -54,6 +54,9 @@ export default async function PerfilPage() {
         Perfil
       </h1>
 
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
+
       {/* Cartão de identificação */}
       <Card>
         <CardBody className="pt-5">
@@ -105,6 +108,9 @@ export default async function PerfilPage() {
           </p>
         </CardBody>
       </Card>
+
+      </div>
+      <div className="space-y-6">
 
       {/* Recados do professor */}
       <section>
@@ -166,6 +172,9 @@ export default async function PerfilPage() {
           </div>
         </CardBody>
       </Card>
+
+      </div>
+      </div>
     </div>
   );
 }

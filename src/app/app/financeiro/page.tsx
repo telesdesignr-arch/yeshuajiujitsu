@@ -53,6 +53,9 @@ export default async function FinanceiroDoAlunoPage() {
         </p>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
+
       {/* Mês atual */}
       {atual ? (
         <MensalidadeCard invoice={atual} destaque />
@@ -135,6 +138,9 @@ export default async function FinanceiroDoAlunoPage() {
         </Card>
       )}
 
+      </div>
+      <div className="space-y-6">
+
       {/* Histórico */}
       <section>
         <SectionTitle>Histórico</SectionTitle>
@@ -153,6 +159,9 @@ export default async function FinanceiroDoAlunoPage() {
           </div>
         )}
       </section>
+
+      </div>
+      </div>
     </div>
   );
 }
