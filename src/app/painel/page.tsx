@@ -17,7 +17,7 @@ import { BarChart, DistributionBars } from "@/components/charts";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, Badge, EmptyState, Stat } from "@/components/ui/misc";
-import { BELTS } from "@/lib/belts";
+import { beltsDaTrilha } from "@/lib/belts";
 import { requireStaff } from "@/lib/auth";
 import { formatDateShortYear, humanDuration } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
@@ -60,6 +60,17 @@ export default async function PainelHome() {
     .slice(0, 5);
 
   const prontos = candidatos.filter((c) => c.pronto);
+
+  // Distribuição por faixa: adultos primeiro, depois infantil, sem as faixas
+  // que não têm ninguém.
+  const faixasComAlunos = [...beltsDaTrilha("ADULTO"), ...beltsDaTrilha("INFANTIL")]
+    .map((b) => ({
+      label: b.label,
+      value: overview.porFaixa.find((f) => f.belt === b.key)?.count ?? 0,
+      color: b.color,
+      stripe: b.stripe,
+    }))
+    .filter((f) => f.value > 0);
 
   return (
     <div className="space-y-6">
@@ -138,15 +149,18 @@ export default async function PainelHome() {
             <CardTitle>Alunos por faixa</CardTitle>
           </CardHeader>
           <CardBody>
+            {/* Com as duas escadas somamos 18 faixas possíveis. Mostrar todas
+                deixaria a lista cheia de linhas zeradas, então só entram as
+                faixas que existem hoje na academia. */}
             <DistributionBars
               total={overview.alunosAtivos}
-              data={BELTS.map((b) => ({
-                label: b.label,
-                value: overview.porFaixa.find((f) => f.belt === b.key)?.count ?? 0,
-                color: b.color,
-                ring: b.key === "BRANCA",
-              }))}
+              data={faixasComAlunos}
             />
+            {faixasComAlunos.length === 0 && (
+              <p className="text-sm text-ink-500">
+                Nenhum aluno ativo cadastrado ainda.
+              </p>
+            )}
           </CardBody>
         </Card>
       </div>

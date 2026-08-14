@@ -12,7 +12,13 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-import { BELTS, MAX_DEGREE, graduationRank, nextStep } from "../src/lib/belts";
+import {
+  MAX_DEGREE,
+  beltInfo,
+  beltsDaTrilha,
+  graduationRank,
+  nextStep,
+} from "../src/lib/belts";
 
 const prisma = new PrismaClient();
 
@@ -69,10 +75,13 @@ const HORARIOS = [
   { weekday: 5, startTime: "20:30", endTime: "22:00", title: "Jiu-Jitsu", type: "ADULTO" },
 ];
 
-// Aulas que entram na chamada dos alunos de exemplo -- que sao todos adultos.
-// As turmas de criancas e adolescentes existem na grade, mas nao recebem
-// presenca ficticia porque nao ha aluno de exemplo nessas faixas etarias.
-const AULAS_PRINCIPAIS = HORARIOS.filter((h) => h.type === "ADULTO");
+// Quantas aulas por semana cada turma tem. Usado para calibrar a chance de
+// presenca: quem treina numa turma com menos aulas precisa de chance maior por
+// aula para chegar na mesma meta mensal.
+const AULAS_POR_SEMANA: Record<string, number> = HORARIOS.reduce(
+  (acc, h) => ({ ...acc, [h.type]: (acc[h.type] ?? 0) + 1 }),
+  {} as Record<string, number>,
+);
 
 const TECNICAS = [
   "Passagem de guarda com pressão · joelho na barriga",
@@ -102,9 +111,12 @@ type SeedStudent = {
   gradeAgeMonths: number;
   /** 0 a 1: quao assiduo ele e */
   consistency: number;
+  /** em qual turma ele treina (define de quais aulas recebe presenca) */
+  turma?: "ADULTO" | "ADOLESCENTE" | "KIDS";
   competitor?: boolean;
   monthlyGoal?: number;
   phone?: string;
+  guardian?: string;
 };
 
 // Os valores de gradeAgeMonths foram escolhidos para dar uma turma realista:
@@ -127,6 +139,16 @@ const ALUNOS: SeedStudent[] = [
   { name: "Fernanda Rocha", email: "fernanda@exemplo.com", belt: "AZUL", degree: 1, gradeAgeMonths: 4, consistency: 0.71, monthlyGoal: 12, phone: "(21) 98888-1013" },
   { name: "Gabriel Souza", email: "gabriel@exemplo.com", belt: "BRANCA", degree: 4, gradeAgeMonths: 7, consistency: 0.9, competitor: true, monthlyGoal: 16, phone: "(21) 98888-1014" },
   { name: "Marcelo Antunes", email: "marcelo@exemplo.com", belt: "BRANCA", degree: 2, gradeAgeMonths: 5, consistency: 0.31, phone: "(21) 98888-1015" },
+
+  // Turmas infantil e de adolescentes, para exercitar a escada de 13 faixas
+  // Turma infantil (crianças) — faixas mais baixas, tempo de casa plausível
+  { name: "Miguel Ramos", email: "miguel@exemplo.com", belt: "INF_CINZA_PRETA", degree: 2, gradeAgeMonths: 3, consistency: 0.8, turma: "KIDS", monthlyGoal: 10, guardian: "Patrícia Ramos — (21) 98888-2001" },
+  { name: "Helena Duarte", email: "helena@exemplo.com", belt: "INF_CINZA", degree: 1, gradeAgeMonths: 2, consistency: 0.72, turma: "KIDS", monthlyGoal: 10, guardian: "Carlos Duarte — (21) 98888-2002" },
+  { name: "Isabela Freitas", email: "isabela@exemplo.com", belt: "INF_AMARELA_BRANCA", degree: 4, gradeAgeMonths: 4, consistency: 0.9, turma: "KIDS", monthlyGoal: 10, guardian: "Renata Freitas — (21) 98888-2003" },
+  // Turma de adolescentes — mais anos de casa, faixas mais altas
+  { name: "Enzo Martins", email: "enzo@exemplo.com", belt: "INF_AMARELA_PRETA", degree: 3, gradeAgeMonths: 3, consistency: 0.85, turma: "ADOLESCENTE", monthlyGoal: 10, competitor: true, guardian: "Sandra Martins — (21) 98888-2004" },
+  { name: "Sophia Nunes", email: "sophia@exemplo.com", belt: "INF_LARANJA_BRANCA", degree: 1, gradeAgeMonths: 2, consistency: 0.68, turma: "ADOLESCENTE", monthlyGoal: 10, guardian: "Marcos Nunes — (21) 98888-2005" },
+  { name: "Davi Carvalho", email: "davi@exemplo.com", belt: "INF_LARANJA_PRETA", degree: 4, gradeAgeMonths: 5, consistency: 0.76, turma: "ADOLESCENTE", monthlyGoal: 10, guardian: "Juliana Carvalho — (21) 98888-2006" },
 ];
 
 const OBSERVACOES = [
@@ -143,20 +165,39 @@ const OBSERVACOES = [
  * datas fiquem coerentes com o tempo esperado em cada grau.
  */
 function buildGraduationHistory(belt: string, degree: number, currentSince: Date) {
-  const steps: { belt: string; degree: number }[] = [];
+  const info = beltInfo(belt);
+  const escada = beltsDaTrilha(info.track);
   const targetRank = graduationRank(belt, degree);
-  for (const b of BELTS) {
+
+  // Nas faixas infantis registramos so a troca de faixa das etapas antigas, e
+  // os graus apenas da faixa atual.
+  //
+  // Se gerassemos os 4 graus de cada uma das 13 faixas, um adolescente de 13
+  // anos apareceria com 49 graduacoes e doze anos de academia -- teria comecado
+  // com um ano de idade. Na pratica a crianca nao percorre todos os graus de
+  // todas as faixas: ela pula degraus pelo caminho.
+  const compacto = info.track === "INFANTIL";
+
+  const steps: { belt: string; degree: number }[] = [];
+  for (const b of escada) {
     for (let d = 0; d <= MAX_DEGREE; d++) {
       if (graduationRank(b.key, d) > targetRank) break;
+      if (compacto && b.key !== belt && d > 0) continue;
       steps.push({ belt: b.key, degree: d });
     }
-    if (graduationRank(b.key, MAX_DEGREE) >= targetRank) break;
+    if (b.key === belt) break;
   }
 
   const dates: Date[] = new Array(steps.length);
   dates[steps.length - 1] = currentSince;
+
   for (let i = steps.length - 2; i >= 0; i--) {
-    const gap = nextStep(steps[i].belt, steps[i].degree).expectedMonths ?? 6;
+    const trocaDeFaixa = steps[i].belt !== steps[i + 1].belt;
+    // Uma troca de faixa infantil representa o ciclo inteiro daquela faixa.
+    const gap = trocaDeFaixa
+      ? beltInfo(steps[i].belt).monthsPerDegree * MAX_DEGREE +
+        (beltInfo(steps[i].belt).monthsToNextBelt ?? 6)
+      : (nextStep(steps[i].belt, steps[i].degree).expectedMonths ?? 6);
     // pequena variacao para nao ficar tudo no mesmo dia do mes
     const jitter = Math.floor(random() * 2);
     dates[i] = addMonths(dates[i + 1], -(gap + jitter));
@@ -249,7 +290,13 @@ async function main() {
   // Alunos + graduacoes
   // -------------------------------------------------------------------------
   console.log("Criando alunos e historico de graduacoes...");
-  const alunosCriados: { id: string; consistency: number; joinedAt: Date }[] = [];
+  const alunosCriados: {
+    id: string;
+    consistency: number;
+    joinedAt: Date;
+    turma: string;
+    meta: number;
+  }[] = [];
 
   for (const aluno of ALUNOS) {
     const beltSinceAt = addMonths(hoje, -aluno.gradeAgeMonths);
@@ -277,6 +324,7 @@ async function main() {
         monthlyGoal: aluno.monthlyGoal ?? 12,
         isCompetitor: aluno.competitor ?? false,
         phone: aluno.phone,
+        guardianName: aluno.guardian,
         active: true,
       },
     });
@@ -315,6 +363,8 @@ async function main() {
       id: student.id,
       consistency: aluno.consistency,
       joinedAt,
+      turma: aluno.turma ?? "ADULTO",
+      meta: aluno.monthlyGoal ?? 12,
     });
   }
 
@@ -329,7 +379,7 @@ async function main() {
   for (let d = new Date(inicio); d <= hoje; d.setDate(d.getDate() + 1)) {
     const dia = new Date(d);
     const weekday = dia.getDay();
-    const aulasDoDia = AULAS_PRINCIPAIS.filter((h) => h.weekday === weekday);
+    const aulasDoDia = HORARIOS.filter((h) => h.weekday === weekday);
     if (aulasDoDia.length === 0) continue;
 
     for (const aula of aulasDoDia) {
@@ -346,13 +396,14 @@ async function main() {
       });
       sessoes += 1;
 
-      // Cada aluno tem uma chance de estar nesta aula. Dividimos pela
-      // quantidade de aulas da semana para que a media caia perto da meta.
-      const aulasPorSemana = AULAS_PRINCIPAIS.length;
+      // So entram nesta aula os alunos da turma dela. Cada um tem uma chance
+      // de estar presente, calibrada para a media cair perto da meta mensal.
+      const aulasPorSemana = AULAS_POR_SEMANA[aula.type] ?? 1;
       const rows = [];
       for (const aluno of alunosCriados) {
+        if (aluno.turma !== aula.type) continue;
         if (dia < aluno.joinedAt) continue;
-        const chance = (aluno.consistency * 12) / (aulasPorSemana * 4.33);
+        const chance = (aluno.consistency * aluno.meta) / (aulasPorSemana * 4.33);
         if (random() < chance) {
           rows.push({
             sessionId: session.id,

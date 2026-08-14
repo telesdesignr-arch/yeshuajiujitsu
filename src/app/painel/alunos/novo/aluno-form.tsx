@@ -8,7 +8,8 @@ import { createStudent, type ActionState } from "@/actions/painel";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/field";
-import { BELTS, MAX_DEGREE } from "@/lib/belts";
+import { BeltSelectOptions } from "@/components/belt";
+import { MAX_DEGREE } from "@/lib/belts";
 import { hojeISO } from "@/lib/dates";
 
 function Salvar() {
@@ -103,11 +104,7 @@ export function AlunoForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Faixa" htmlFor="belt" required>
               <Select id="belt" name="belt" defaultValue="BRANCA" required>
-                {BELTS.map((b) => (
-                  <option key={b.key} value={b.key}>
-                    {b.label}
-                  </option>
-                ))}
+                <BeltSelectOptions />
               </Select>
             </Field>
 

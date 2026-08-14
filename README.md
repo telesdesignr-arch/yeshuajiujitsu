@@ -116,6 +116,20 @@ sobre os dias que já passaram.
 A frequência do mês corrente oscila demais no começo do mês. Para sugerir
 graduação, o sistema usa os 3 meses fechados anteriores.
 
+**Duas escadas de graduação, não uma.**
+Até 15 anos o aluno segue a escada infantil, com 13 faixas (Branca → Cinza e
+Branca → Cinza → … → Verde e Preta). Aos 16 entra na adulta, com 5. Nas faixas
+de nome composto, a primeira cor é o corpo da faixa e a segunda é uma listra
+que corre de ponta a ponta. O sistema descobre em qual escada o aluno está
+pela faixa que ele tem — não existe campo separado para isso.
+
+**O ritmo infantil é de uma faixa por ano.**
+São 13 faixas até a Verde e Preta. Se cada uma demorasse o mesmo que uma faixa
+adulta, uma criança de 14 anos precisaria ter começado a treinar com 3 meses
+de vida. Dois meses por grau mais quatro no 4º grau fecha em doze meses por
+faixa. **Esses números são estimativa e devem ser conferidos com o Renato**
+(`src/lib/belts.ts`).
+
 **O sistema sugere, o professor decide.**
 Nenhuma graduação é automática. A tela `/painel/graduacoes` é uma lista de
 sugestões — quem gradua é sempre o professor.

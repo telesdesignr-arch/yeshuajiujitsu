@@ -5,10 +5,12 @@ import { BeltBar, BeltChip, DegreeDots } from "@/components/belt";
 import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState, Progress, Stat } from "@/components/ui/misc";
 import {
-  BELTS,
+  beltsDaTrilha,
   graduationLabel,
   graduationRank,
   nextStep,
+  trackOf,
+  TRACK_LABEL,
 } from "@/lib/belts";
 import { requireStudent } from "@/lib/auth";
 import { formatDateLong, humanDuration } from "@/lib/dates";
@@ -33,8 +35,12 @@ export default async function EvolucaoPage() {
 
   const proximo = nextStep(student.belt, student.degree);
 
+  // A escada do aluno: infantil ou adulta, conforme a faixa que ele tem hoje.
+  const trilha = trackOf(student.belt);
+  const escada = beltsDaTrilha(trilha);
+
   // Tempo que o aluno passou (ou está passando) em cada faixa.
-  const porFaixa = BELTS.map((belt) => {
+  const porFaixa = escada.map((belt) => {
     const doGrupo = graduacoes
       .filter((g) => g.belt === belt.key)
       .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -242,10 +248,11 @@ export default async function EvolucaoPage() {
       <Card>
         <CardHeader>
           <CardTitle>O caminho completo</CardTitle>
+          <p className="mt-1 text-sm text-ink-500">{TRACK_LABEL[trilha]}</p>
         </CardHeader>
         <CardBody>
           <ul className="space-y-4">
-            {BELTS.map((belt) => {
+            {escada.map((belt) => {
               const rankAtual = graduationRank(student.belt, student.degree);
               const passou = graduationRank(belt.key, 4) < rankAtual;
               const atual = belt.key === student.belt;

@@ -10,11 +10,10 @@ import {
   updateStudent,
   type ActionState,
 } from "@/actions/painel";
-import { BeltBar } from "@/components/belt";
+import { BeltBar, BeltSelectOptions } from "@/components/belt";
 import { Button } from "@/components/ui/button";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/field";
 import {
-  BELTS,
   GRADUATION_CRITERIA,
   MAX_DEGREE,
   graduationLabel,
@@ -96,11 +95,7 @@ export function GraduacaoForm({
             onChange={(e) => setBelt(e.target.value as typeof belt)}
             required
           >
-            {BELTS.map((b) => (
-              <option key={b.key} value={b.key}>
-                {b.label}
-              </option>
-            ))}
+            <BeltSelectOptions />
           </Select>
         </Field>
 

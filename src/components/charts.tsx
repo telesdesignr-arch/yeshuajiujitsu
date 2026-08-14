@@ -123,8 +123,8 @@ export type DistributionDatum = {
   label: string;
   value: number;
   color: string;
-  /** cor da borda, para faixas claras que somem no branco */
-  ring?: boolean;
+  /** listra central, nas faixas de nome composto ("Verde e Preta") */
+  stripe?: string;
 };
 
 /**
@@ -148,24 +148,33 @@ export function DistributionBars({
         const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
         return (
           <li key={d.label} className="flex items-center gap-3">
-            <span className="flex w-24 shrink-0 items-center gap-2">
-              <span
+            <span className="flex w-32 shrink-0 items-center gap-2">
+              <svg
                 aria-hidden
-                className={cn(
-                  "size-3 shrink-0 rounded-[3px]",
-                  d.ring && "ring-1 ring-ink-200",
-                )}
-                style={{ background: d.color }}
-              />
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                className="shrink-0 rounded-[3px]"
+              >
+                <rect width="12" height="12" fill={d.color} />
+                {d.stripe && <rect y="4.5" width="12" height="3" fill={d.stripe} />}
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="11"
+                  height="11"
+                  fill="none"
+                  stroke="rgba(20,16,13,0.25)"
+                />
+              </svg>
               <span className="truncate text-sm font-semibold">{d.label}</span>
             </span>
             <span className="h-3 flex-1 overflow-hidden rounded-pill bg-ink-100">
               <span
-                className="block h-full rounded-pill"
+                className="block h-full rounded-pill ring-1 ring-inset ring-black/10"
                 style={{
                   width: `${(d.value / max) * 100}%`,
                   background: d.color,
-                  border: d.ring ? "1px solid var(--color-ink-200)" : undefined,
                 }}
               />
             </span>

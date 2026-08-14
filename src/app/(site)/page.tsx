@@ -15,9 +15,9 @@ import {
 import { BeltBar } from "@/components/belt";
 import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { ButtonLink } from "@/components/ui/button";
-import { Card, CardBody } from "@/components/ui/card";
+import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/misc";
-import { BELTS } from "@/lib/belts";
+import { TRACK_LABEL, beltsDaTrilha } from "@/lib/belts";
 import { ACADEMIA, whatsappLink } from "@/lib/academia";
 import { WEEKDAYS, formatDateLong } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
@@ -268,6 +268,11 @@ export default async function HomePage() {
                 professor vê que a técnica e a postura amadureceram.
               </p>
               <p className="mt-4 text-lg text-ink-500">
+                Quem tem até 15 anos segue a escada infantil, com treze faixas —
+                bem mais degraus, para a criança sentir que está avançando. Aos
+                16 anos, entra na escada adulta.
+              </p>
+              <p className="mt-4 text-lg text-ink-500">
                 Na área do aluno você acompanha tudo: quando recebeu cada
                 graduação, quem entregou, há quanto tempo está na faixa atual e o
                 que falta para o próximo passo.
@@ -278,23 +283,27 @@ export default async function HomePage() {
               </ButtonLink>
             </div>
 
-            <Card>
-              <CardBody className="space-y-5 pt-5">
-                {BELTS.map((belt) => (
-                  <div key={belt.key}>
-                    <div className="mb-1.5 flex items-baseline justify-between">
-                      <span className="font-display text-base font-bold tracking-wide uppercase">
-                        Faixa {belt.label}
-                      </span>
-                      <span className="text-xs text-ink-500">
-                        4 graus até a próxima
-                      </span>
-                    </div>
-                    <BeltBar belt={belt.key} degree={4} height={26} />
-                  </div>
-                ))}
-              </CardBody>
-            </Card>
+            <div className="space-y-4">
+              {(["ADULTO", "INFANTIL"] as const).map((trilha) => (
+                <Card key={trilha}>
+                  <CardHeader>
+                    <CardTitle className="text-base">
+                      {TRACK_LABEL[trilha]}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardBody className="space-y-3">
+                    {beltsDaTrilha(trilha).map((belt) => (
+                      <div key={belt.key}>
+                        <p className="mb-1 text-sm font-semibold">
+                          Faixa {belt.label}
+                        </p>
+                        <BeltBar belt={belt.key} degree={4} height={22} />
+                      </div>
+                    ))}
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>

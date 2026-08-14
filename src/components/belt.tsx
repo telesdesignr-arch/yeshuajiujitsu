@@ -1,10 +1,44 @@
-import { beltInfo, graduationLabel, MAX_DEGREE } from "@/lib/belts";
+import {
+  beltInfo,
+  beltsDaTrilha,
+  graduationLabel,
+  MAX_DEGREE,
+  TRACK_LABEL,
+  type Track,
+} from "@/lib/belts";
 import { cn } from "@/lib/utils";
 
 /**
- * Desenho da faixa com a ponteira e os graus.
- * Faixas coloridas usam ponteira preta; a faixa preta usa ponteira vermelha,
- * como manda a tradicao do Jiu-Jitsu.
+ * Opcoes de faixa para um <select>, separadas por escada.
+ * Assim o professor nao corre o risco de dar uma faixa azul adulta para uma
+ * crianca de 9 anos so porque as duas listas estavam misturadas.
+ */
+export function BeltSelectOptions() {
+  const trilhas: Track[] = ["ADULTO", "INFANTIL"];
+  return (
+    <>
+      {trilhas.map((t) => (
+        <optgroup key={t} label={TRACK_LABEL[t]}>
+          {beltsDaTrilha(t).map((b) => (
+            <option key={b.key} value={b.key}>
+              {b.label}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </>
+  );
+}
+
+/**
+ * Desenho da faixa.
+ *
+ * Faixas de nome composto ("Verde e Preta") tem uma listra da segunda cor que
+ * corre de ponta a ponta pelo meio da faixa. A ponteira fica sobre ela, como
+ * na faixa de verdade, e sobra um pedaco de faixa depois dela.
+ *
+ * Ponteira preta nas faixas coloridas; vermelha na faixa preta, como manda a
+ * tradicao do Jiu-Jitsu.
  */
 export function BeltBar({
   belt,
@@ -20,68 +54,78 @@ export function BeltBar({
   const info = beltInfo(belt);
   const isBlack = info.key === "PRETA";
   const tipColor = isBlack ? "#a4161a" : "#111111";
-  const bodyStroke = info.key === "BRANCA" ? "#cdc7bf" : "rgba(0,0,0,0.18)";
+
+  // Faixas claras somem no fundo branco: ganham um contorno discreto.
+  const claras = ["#f2f0ed", "#f2c009"];
+  const outline = claras.includes(info.color)
+    ? "rgba(20,16,13,0.22)"
+    : "rgba(20,16,13,0.10)";
 
   const stripes = Math.max(0, Math.min(MAX_DEGREE, degree));
-  const stripeWidth = 7;
-  const stripeGap = 6;
-  const tipStart = 122;
-  const tipEnd = 198;
+
+  // Geometria (viewBox 300 x 56)
+  const H = 56;
+  const listraY = 20;
+  const listraH = 16;
+  const tipStart = 176;
+  const tipEnd = 276;
+  const grauW = 9;
+  const grauGap = 8;
 
   return (
     <div className={cn("w-full", className)}>
       <svg
-        viewBox="0 0 200 40"
+        viewBox={`0 0 300 ${H}`}
         preserveAspectRatio="none"
         style={{ height, width: "100%" }}
         role="img"
         aria-label={graduationLabel(belt, degree)}
       >
-        <rect
-          x="1"
-          y="1"
-          width="198"
-          height="38"
-          rx="5"
-          fill={info.color}
-          stroke={bodyStroke}
-          strokeWidth="1.5"
-        />
+        {/* corpo da faixa */}
+        <rect x="0" y="0" width="300" height={H} fill={info.color} />
+
+        {/* listra central, de ponta a ponta */}
+        {info.stripe && (
+          <rect x="0" y={listraY} width="300" height={listraH} fill={info.stripe} />
+        )}
+
+        {/* ponteira */}
         <rect
           x={tipStart}
-          y="1"
+          y="0"
           width={tipEnd - tipStart}
-          height="38"
-          rx="5"
+          height={H}
           fill={tipColor}
         />
-        {/* costura da faixa */}
-        <line
-          x1="6"
-          y1="20"
-          x2={tipStart - 4}
-          y2="20"
-          stroke={info.key === "BRANCA" ? "#d8d2c9" : "rgba(255,255,255,0.16)"}
-          strokeWidth="1"
-          strokeDasharray="5 4"
-        />
+
+        {/* graus, contados da ponta para dentro */}
         {Array.from({ length: stripes }).map((_, i) => (
           <rect
             key={i}
-            x={tipEnd - 10 - i * (stripeWidth + stripeGap) - stripeWidth}
-            y="5"
-            width={stripeWidth}
-            height="30"
-            rx="1.5"
+            x={tipEnd - 14 - grauW - i * (grauW + grauGap)}
+            y="7"
+            width={grauW}
+            height={H - 14}
             fill="#ffffff"
           />
         ))}
+
+        {/* contorno */}
+        <rect
+          x="0.5"
+          y="0.5"
+          width="299"
+          height={H - 1}
+          fill="none"
+          stroke={outline}
+          strokeWidth="1"
+        />
       </svg>
     </div>
   );
 }
 
-/** Versao compacta: bolinha da cor da faixa + texto. Usada em listas. */
+/** Versao compacta: amostra da faixa + nome. Usada em listas. */
 export function BeltChip({
   belt,
   degree,
@@ -94,6 +138,8 @@ export function BeltChip({
   size?: "sm" | "md";
 }) {
   const info = beltInfo(belt);
+  const lado = size === "sm" ? 12 : 14;
+
   return (
     <span
       className={cn(
@@ -102,19 +148,26 @@ export function BeltChip({
         className,
       )}
     >
-      <span
+      <svg
         aria-hidden
-        className="inline-block shrink-0 rounded-[2px] ring-1 ring-black/15"
-        style={{
-          background: info.color,
-          width: size === "sm" ? 10 : 12,
-          height: size === "sm" ? 10 : 12,
-        }}
-      />
-      <span>{info.label}</span>
-      {degree > 0 && (
-        <span className="tabular text-ink-500">{degree}º</span>
-      )}
+        width={lado}
+        height={lado}
+        viewBox="0 0 14 14"
+        className="shrink-0 rounded-[2px]"
+      >
+        <rect width="14" height="14" fill={info.color} />
+        {info.stripe && <rect y="5" width="14" height="4" fill={info.stripe} />}
+        <rect
+          x="0.5"
+          y="0.5"
+          width="13"
+          height="13"
+          fill="none"
+          stroke="rgba(20,16,13,0.25)"
+        />
+      </svg>
+      <span className="whitespace-nowrap">{info.label}</span>
+      {degree > 0 && <span className="tabular text-ink-500">{degree}º</span>}
     </span>
   );
 }

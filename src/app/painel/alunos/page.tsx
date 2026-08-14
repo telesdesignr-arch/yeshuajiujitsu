@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Search, UserPlus, Users } from "lucide-react";
 
-import { BeltChip } from "@/components/belt";
-import { ButtonLink } from "@/components/ui/button";
+import { BeltChip, BeltSelectOptions } from "@/components/belt";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
+import { Input, Select } from "@/components/ui/field";
 import { Avatar, Badge, EmptyState } from "@/components/ui/misc";
-import { BELTS, graduationRank } from "@/lib/belts";
+import { graduationRank } from "@/lib/belts";
 import { requireStaff } from "@/lib/auth";
 import { formatDateShortYear } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
@@ -51,10 +51,6 @@ export default async function AlunosPage({
       a.user.name.localeCompare(b.user.name, "pt-BR"),
   );
 
-  const filtros = [
-    { key: "", label: "Todas as faixas" },
-    ...BELTS.map((b) => ({ key: b.key, label: b.label })),
-  ];
 
   return (
     <div className="space-y-5">
@@ -74,11 +70,13 @@ export default async function AlunosPage({
         </ButtonLink>
       </div>
 
-      {/* Busca e filtros */}
-      <form method="get" className="space-y-3">
-        <input type="hidden" name="faixa" value={faixa} />
+      {/* Busca e filtros
+          Com as escadas infantil e adulta juntas são 18 faixas: uma fileira de
+          botões viraria uma rolagem infinita no celular, então a faixa virou
+          uma lista suspensa agrupada por escada. */}
+      <form method="get" className="flex flex-wrap items-end gap-2">
         <input type="hidden" name="status" value={status} />
-        <div className="relative">
+        <div className="relative min-w-[160px] flex-1">
           <Search
             aria-hidden
             className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-500"
@@ -92,24 +90,19 @@ export default async function AlunosPage({
             className="pl-9"
           />
         </div>
+        <Select
+          name="faixa"
+          defaultValue={faixa}
+          aria-label="Filtrar por faixa"
+          className="w-auto min-w-[150px]"
+        >
+          <option value="">Todas as faixas</option>
+          <BeltSelectOptions />
+        </Select>
+        <Button type="submit" variant="outline">
+          Filtrar
+        </Button>
       </form>
-
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-        {filtros.map((f) => (
-          <Link
-            key={f.key}
-            href={`/painel/alunos?${new URLSearchParams({ q, status, ...(f.key ? { faixa: f.key } : {}) })}`}
-            className={cn(
-              "shrink-0 rounded-pill border px-3.5 py-1.5 text-sm font-semibold transition-smooth",
-              faixa === f.key
-                ? "border-ink bg-ink text-white"
-                : "border-line bg-white text-ink-500 hover:bg-ink-100",
-            )}
-          >
-            {f.label}
-          </Link>
-        ))}
-      </div>
 
       {ordenados.length === 0 ? (
         <EmptyState
