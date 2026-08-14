@@ -11,6 +11,7 @@ import {
 
 import { CampeonatoForm } from "./formularios";
 import { MedalTallyRow } from "@/components/medal";
+import { Federacoes } from "@/components/federacoes";
 import { BeltChip } from "@/components/belt";
 import { Card, CardBody, Collapsible, SectionTitle } from "@/components/ui/card";
 import { Avatar, Badge, EmptyState, Stat } from "@/components/ui/misc";
@@ -129,6 +130,8 @@ export default async function PainelCampeonatosPage() {
       >
         <CampeonatoForm />
       </Collapsible>
+
+      <Federacoes descricao="Consulte os calendários oficiais para saber o que vem por aí e cadastrar aqui os campeonatos que valem a pena para a equipe." />
 
       {/* Próximos */}
       <SectionTitle>Próximos campeonatos</SectionTitle>

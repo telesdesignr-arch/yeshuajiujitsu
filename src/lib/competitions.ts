@@ -2,6 +2,57 @@
  * Campeonatos e resultados dos atletas.
  */
 
+/* -------------------------------------------------------------------------- */
+/* Federacoes                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Calendarios oficiais das federacoes onde a equipe compete.
+ *
+ * Por que apenas links, e nao importacao automatica:
+ *
+ * Investigamos os quatro sites. So o CBJJ tem API de verdade
+ * (/api/v1/events/upcomings.json, exige o cabecalho X-Requested-With). LBJJ e
+ * CBJJD sao WordPress -- no LBJJ os campeonatos sao posts da categoria
+ * "competicoes" e dariam para ler pela API; no CBJJD nao, sao HTML solto. A
+ * FJJRIO e PHP sem JSON nenhum.
+ *
+ * Ou seja: as duas federacoes mais relevantes para uma academia do Rio (FJJRIO
+ * e CBJJD) sao justamente as que exigiriam raspagem de HTML -- que quebra em
+ * silencio quando eles mexem no site, e deixa o aluno vendo lista velha.
+ *
+ * Como sao cerca de 15 campeonatos por ano que interessam a equipe, cadastrar
+ * a mao custa uns 15 minutos por ano e ainda funciona como curadoria: o
+ * professor publica so o que faz sentido para os alunos dele. Estes links
+ * cobrem quem quiser ver o calendario completo, sempre atualizado na fonte.
+ */
+export const FEDERACOES = [
+  {
+    sigla: "FJJRIO",
+    nome: "Federação de Jiu-Jitsu do Rio de Janeiro",
+    descricao: "Campeonatos estaduais do Rio, com e sem kimono.",
+    url: "https://www.fjjrio.app.br/",
+  },
+  {
+    sigla: "CBJJD",
+    nome: "Confederação Brasileira de Jiu-Jitsu Desportivo",
+    descricao: "Circuitos Mineirinho e as etapas nacionais.",
+    url: "https://cbjjd.com.br/eventos/",
+  },
+  {
+    sigla: "CBJJ",
+    nome: "Confederação Brasileira de Jiu-Jitsu (IBJJF)",
+    descricao: "Opens internacionais, Brasileiro e Mundial. Exige carteirinha.",
+    url: "https://cbjj.com.br/events/championships",
+  },
+  {
+    sigla: "LBJJ",
+    nome: "Liga Brasileira de Jiu-Jitsu",
+    descricao: "Interclubes, festivais e etapas da liga.",
+    url: "https://lbjj.com.br/calendario/",
+  },
+] as const;
+
 export type Modality = "GI" | "NOGI" | "AMBOS";
 
 export const MODALITIES: Record<string, { label: string; short: string }> = {

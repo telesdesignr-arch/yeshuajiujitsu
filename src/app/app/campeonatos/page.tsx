@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
+import { Federacoes } from "@/components/federacoes";
 import { Medal, MedalTallyRow } from "@/components/medal";
 import { Card, CardBody, SectionTitle } from "@/components/ui/card";
 import { Badge, EmptyState, Stat } from "@/components/ui/misc";
@@ -265,6 +266,9 @@ export default async function CampeonatosDoAlunoPage() {
           </div>
         )}
       </section>
+
+      {/* Calendários oficiais */}
+      <Federacoes />
     </div>
   );
 }
