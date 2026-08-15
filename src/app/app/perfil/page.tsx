@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   CalendarClock,
+  Camera,
   KeyRound,
   Mail,
   MessageSquareQuote,
@@ -12,8 +13,16 @@ import {
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
+import { FotoAluno } from "@/components/foto-aluno";
 import { LogoutButton } from "@/components/logout-button";
-import { Card, CardBody, CardHeader, CardTitle, SectionTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  Collapsible,
+  SectionTitle,
+} from "@/components/ui/card";
 import { Avatar, Badge, EmptyState } from "@/components/ui/misc";
 import { graduationLabel } from "@/lib/belts";
 import { modalityLabel, temGraduacao } from "@/lib/modalities";
@@ -88,6 +97,21 @@ export default async function PerfilPage() {
           )}
         </CardBody>
       </Card>
+
+      {/* O próprio aluno põe a foto: é o jeito de o professor não precisar
+          fotografar 50 pessoas uma a uma. */}
+      <Collapsible
+        title="Minha foto"
+        description={student.photoUrl ? "Trocar ou tirar" : "Coloque uma foto sua"}
+        icon={Camera}
+        defaultOpen={!student.photoUrl}
+      >
+        <FotoAluno
+          studentId={student.id}
+          name={student.user.name}
+          photoUrl={student.photoUrl}
+        />
+      </Collapsible>
 
       {/* Dados */}
       <Card>

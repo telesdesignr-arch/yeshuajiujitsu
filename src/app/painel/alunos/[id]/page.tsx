@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   Award,
   CalendarCheck,
+  Camera,
   CheckCircle2,
   Flame,
   KeyRound,
@@ -28,6 +29,7 @@ import {
 } from "./formularios";
 import { deleteGraduation, deleteNote } from "@/actions/painel";
 import { AttendanceCalendar } from "@/components/attendance-calendar";
+import { FotoAluno } from "@/components/foto-aluno";
 import { BeltBar } from "@/components/belt";
 import { BarChart } from "@/components/charts";
 import { SenhaTemporaria } from "@/components/senha-temporaria";
@@ -386,6 +388,18 @@ export default async function AlunoPage({
           primeiro acesso ele é obrigado a criar uma senha só dele.
         </p>
         <SenhaTemporaria userId={student.userId} />
+      </Collapsible>
+
+      <Collapsible
+        title="Foto do aluno"
+        description={student.photoUrl ? "Trocar ou tirar a foto" : "Ainda sem foto"}
+        icon={Camera}
+      >
+        <FotoAluno
+          studentId={student.id}
+          name={student.user.name}
+          photoUrl={student.photoUrl}
+        />
       </Collapsible>
 
       <Collapsible

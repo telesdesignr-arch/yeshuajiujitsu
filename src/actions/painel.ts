@@ -4,10 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { hashPassword, requireStaff } from "@/lib/auth";
+import { hashPassword, requireStaff, requireUser } from "@/lib/auth";
 import { BELT_KEYS, MAX_DEGREE, graduationRank } from "@/lib/belts";
 import { dataBrasileira, naAcademia } from "@/lib/dates";
+import { fotoValida } from "@/lib/foto";
 import { prisma } from "@/lib/prisma";
+import { isStaff } from "@/lib/session";
 
 export type ActionState = { error?: string; success?: string };
 
@@ -32,6 +34,58 @@ const alunoSchema = z.object({
 });
 
 const SENHA_INICIAL = "yeshua123";
+
+/* -------------------------------------------------------------------------- */
+/* Foto do aluno                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Salva ou tira a foto de um aluno.
+ *
+ * Quem pode: o professor, para qualquer aluno; e o proprio aluno, para a
+ * propria foto. Sem essa checagem, qualquer aluno logado poderia trocar a foto
+ * de outro so mandando outro id.
+ */
+export async function saveStudentPhoto(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const sessao = await requireUser();
+  const studentId = String(formData.get("studentId") ?? "");
+  const foto = String(formData.get("photo") ?? "");
+  const remover = formData.get("remove") === "1";
+
+  const aluno = await prisma.student.findUnique({
+    where: { id: studentId },
+    select: { id: true, userId: true },
+  });
+  if (!aluno) return { error: "Aluno não encontrado." };
+
+  const ehDono = aluno.userId === sessao.userId;
+  if (!isStaff(sessao.role) && !ehDono) {
+    return { error: "Você não pode alterar a foto de outro aluno." };
+  }
+
+  if (!remover && !fotoValida(foto)) {
+    return {
+      error:
+        "Não consegui ler essa imagem. Tente outra foto, de preferência tirada pelo celular.",
+    };
+  }
+
+  await prisma.student.update({
+    where: { id: studentId },
+    data: { photoUrl: remover ? null : foto },
+  });
+
+  revalidatePath(`/painel/alunos/${studentId}`);
+  revalidatePath("/painel/alunos");
+  revalidatePath("/painel/chamada");
+  revalidatePath("/app/perfil");
+  revalidatePath("/app");
+
+  return { success: remover ? "Foto removida." : "Foto salva." };
+}
 
 export async function createStudent(
   _prev: ActionState,
