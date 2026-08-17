@@ -9,13 +9,14 @@
  * Quase toda faixa tem 4 graus. O caminho e:
  *   Faixa lisa -> 1o Grau -> 2o Grau -> 3o Grau -> 4o Grau -> proxima faixa
  *
- * DUAS EXCECOES no topo da escada adulta:
+ * EXCECOES no topo da escada adulta:
  *
  *   PRETA vai ate o 6o Grau (e nao ate o 4o).
  *
- *   CORAL nao comeca do zero. Ela JA E o 7o grau: quem sai da preta 6o grau
- *   entra direto na coral como 7o. Nao existe "coral 1o grau". Por isso ela
- *   tem minDegree e maxDegree iguais a 7.
+ *   CORAL e VERMELHA nao comecam do zero: a faixa E o grau. Quem sai da preta
+ *   6o grau entra direto na coral como 7o, e da coral vai para a vermelha como
+ *   9o. Nao existe "coral 1o grau" nem "vermelha 1o grau" -- por isso as duas
+ *   tem minDegree igual a maxDegree.
  *
  * Nas faixas de nome composto ("Verde e Preta", "Branca e Vermelha"), a
  * PRIMEIRA cor e o corpo da faixa e a SEGUNDA e uma listra que corre de ponta
@@ -71,7 +72,7 @@ export const TARJA_FIM = 0.1;
  * Maior grau que existe no sistema. Serve so como teto de validacao; o limite
  * que vale de verdade e o da faixa (`maxDegree`).
  */
-export const MAX_DEGREE = 7;
+export const MAX_DEGREE = 9;
 
 /* -------------------------------------------------------------------------- */
 /* Cores                                                                       */
@@ -162,6 +163,19 @@ const ADULTO: BeltDef[] = [
     tipWidth: TARJA_PADRAO * 0.7,
     minDegree: 7,
     maxDegree: 7,
+    monthsPerDegree: 0,
+    // Dez anos ate a vermelha e uma referencia conhecida do esporte.
+    // RENATO: se na Yeshua for outro tempo, e aqui que se muda.
+    monthsToNextBelt: 120,
+  },
+  // Vermelha: como a coral, a faixa e o proprio grau. Entra direto como 9o.
+  {
+    key: "VERMELHA",
+    label: "Vermelha",
+    color: COR.vermelha,
+    tipWidth: TARJA_PADRAO * 0.7,
+    minDegree: 9,
+    maxDegree: 9,
     monthsPerDegree: 0,
     monthsToNextBelt: null,
   },

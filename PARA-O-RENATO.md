@@ -26,15 +26,18 @@ quem está perto de graduar, na tela **Graduações**.
 | Roxa | até o 4º | 5 meses | 6 meses |
 | Marrom | até o 4º | 4 meses | 6 meses |
 | Preta | até o 6º | 3 anos | 7 anos até a coral |
-| Coral | só o 7º | — | topo da escada |
+| Coral | só o 7º | — | 10 anos até a vermelha |
+| Vermelha | só o 9º | — | topo da escada |
 
-**Está certo? Se não, quais são os tempos reais?**
+**Está certo? Se não, quais são os tempos reais?** Os 7 anos e os 10 anos são
+referências conhecidas do esporte, não algo que a Yeshua tenha me passado.
 
-A coral está desenhada com o corpo alternando **blocos brancos e vermelhos** ao
-longo da faixa, e com a tarja preta 30% mais estreita que a das outras faixas.
+Como estão desenhadas: a **coral** tem o corpo alternando blocos brancos e
+vermelhos, e a **vermelha** é lisa. As duas têm a tarja 30% mais estreita que
+as demais faixas.
 
-**Depois da coral tem mais alguma?** Faixa vermelha, 8º grau? Hoje a coral é o
-fim da escada no sistema.
+**Uma dúvida ficou:** a coral é o 7º grau e a vermelha é o 9º. **Existe o 8º
+grau?** Se existir, qual é a faixa dele? Hoje o sistema pula do 7 para o 9.
 
 ## Tempo entre graus — infantil
 
