@@ -37,6 +37,17 @@ export type BeltDef = {
   color: string;
   /** listra central que corre de ponta a ponta, nas faixas compostas */
   stripe?: string;
+  /**
+   * Corpo em blocos alternados ao longo do comprimento, em vez de cor unica.
+   * E o desenho da coral: branco e vermelho se revezando, como a cobra que da
+   * nome a faixa.
+   */
+  bodyPattern?: { cores: string[]; blocos: number };
+  /**
+   * Largura da tarja como fracao da largura da faixa. Vazio = 0.20, que e o
+   * padrao. A coral usa uma tarja mais estreita.
+   */
+  tipWidth?: number;
   /** primeiro grau possivel nesta faixa (0 em todas, menos a coral, que e 7) */
   minDegree: number;
   /** ultimo grau possivel nesta faixa */
@@ -49,6 +60,12 @@ export type BeltDef = {
 
 /** Graus de uma faixa normal: lisa ate o 4o. */
 const GRAUS_PADRAO = { minDegree: 0, maxDegree: 4 };
+
+/** Largura da tarja das faixas comuns, como fracao da largura da faixa. */
+export const TARJA_PADRAO = 0.2;
+
+/** Onde a tarja termina, medido da direita. Sobra um pedaco de faixa depois. */
+export const TARJA_FIM = 0.1;
 
 /**
  * Maior grau que existe no sistema. Serve so como teto de validacao; o limite
@@ -133,11 +150,16 @@ const ADULTO: BeltDef[] = [
   },
   // Coral: entra direto como 7o grau. Nao ha grau anterior dentro dela, por
   // isso minDegree = maxDegree = 7.
+  //
+  // A coral nao tem listra atravessando: o corpo inteiro alterna branco e
+  // vermelho ao longo do comprimento. A tarja dela tambem e mais estreita que
+  // a das outras faixas (30% menos larga).
   {
     key: "CORAL",
-    label: "Branca e Vermelha",
+    label: "Coral",
     color: COR.branca,
-    stripe: COR.vermelha,
+    bodyPattern: { cores: [COR.branca, COR.vermelha], blocos: 14 },
+    tipWidth: TARJA_PADRAO * 0.7,
     minDegree: 7,
     maxDegree: 7,
     monthsPerDegree: 0,

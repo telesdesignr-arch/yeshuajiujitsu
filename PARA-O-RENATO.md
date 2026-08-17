@@ -26,17 +26,15 @@ quem está perto de graduar, na tela **Graduações**.
 | Roxa | até o 4º | 5 meses | 6 meses |
 | Marrom | até o 4º | 4 meses | 6 meses |
 | Preta | até o 6º | 3 anos | 7 anos até a coral |
-| Branca e Vermelha (coral) | só o 7º | — | topo da escada |
+| Coral | só o 7º | — | topo da escada |
 
 **Está certo? Se não, quais são os tempos reais?**
 
-Duas coisas para conferir na coral:
+A coral está desenhada com o corpo alternando **blocos brancos e vermelhos** ao
+longo da faixa, e com a tarja preta 30% mais estreita que a das outras faixas.
 
-1. Desenhei ela como **faixa branca com uma listra vermelha no meio**, seguindo
-   a mesma lógica das faixas infantis compostas. Se na verdade for o contrário
-   (corpo vermelho com listra branca), me avise que eu inverto.
-2. **Depois da coral tem mais alguma?** Faixa vermelha, 8º grau? Hoje a coral é
-   o fim da escada no sistema.
+**Depois da coral tem mais alguma?** Faixa vermelha, 8º grau? Hoje a coral é o
+fim da escada no sistema.
 
 ## Tempo entre graus — infantil
 

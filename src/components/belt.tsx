@@ -2,6 +2,8 @@ import {
   beltInfo,
   beltsDaTrilha,
   graduationLabel,
+  TARJA_FIM,
+  TARJA_PADRAO,
   TRACK_LABEL,
   type Track,
 } from "@/lib/belts";
@@ -30,6 +32,20 @@ export function BeltSelectOptions() {
 }
 
 /**
+ * Paradas de um gradiente com N blocos de largura igual, alternando as cores.
+ * Ex.: 2 cores em 14 blocos -> cada bloco ocupa 1/14 da faixa.
+ */
+function blocosAlternados(cores: string[], blocos: number) {
+  const passo = 100 / blocos;
+  return cores
+    .map(
+      (c, i) =>
+        `${c} ${(passo * i).toFixed(4)}% ${(passo * (i + 1)).toFixed(4)}%`,
+    )
+    .join(", ");
+}
+
+/**
  * Desenho da faixa.
  *
  * Faixas de nome composto ("Verde e Preta") tem uma listra da segunda cor que
@@ -51,10 +67,24 @@ export function BeltBar({
   height?: number;
 }) {
   const info = beltInfo(belt);
-  // Ponteira vermelha na preta e na coral, preta nas coloridas -- como manda a
-  // tradição do Jiu-Jitsu.
-  const pontaVermelha = info.key === "PRETA" || info.key === "CORAL";
-  const tipColor = pontaVermelha ? "#a4161a" : "#111111";
+  // Tarja vermelha na preta, preta nas demais -- como manda a tradição do
+  // Jiu-Jitsu.
+  const corDaTarja = info.key === "PRETA" ? "#a4161a" : "#111111";
+
+  // A coral tem tarja mais estreita que as outras.
+  const larguraTarja = info.tipWidth ?? TARJA_PADRAO;
+
+  // Corpo: cor única, ou blocos alternados ao longo do comprimento (a coral).
+  // Um gradiente que se repete resolve isso sem encher a tela de elementos, e
+  // acompanha a largura da faixa sozinho porque as paradas são em porcentagem.
+  const corpo = info.bodyPattern
+    ? {
+        backgroundImage: `repeating-linear-gradient(90deg, ${blocosAlternados(
+          info.bodyPattern.cores,
+          info.bodyPattern.blocos,
+        )})`,
+      }
+    : { background: info.color };
 
   // Faixas claras somem no fundo branco: ganham um contorno discreto.
   const claras = ["#f2f0ed", "#f2c009"];
@@ -86,7 +116,7 @@ export function BeltBar({
         "relative w-full overflow-hidden rounded-[2px] ring-1 ring-inset",
         className,
       )}
-      style={{ height, background: info.color, ["--tw-ring-color" as string]: outline }}
+      style={{ height, ...corpo, ["--tw-ring-color" as string]: outline }}
       role="img"
       aria-label={graduationLabel(belt, degree)}
     >
@@ -99,20 +129,29 @@ export function BeltBar({
         />
       )}
 
-      {/* ponteira, com os graus cobrindo-a de cima a baixo */}
+      {/* tarja, com os graus cobrindo-a de cima a baixo */}
       <span
         aria-hidden
-        className="absolute inset-y-0 flex items-stretch justify-end"
+        className="absolute inset-y-0 flex items-stretch justify-end overflow-hidden"
         style={{
-          left: "70%",
-          right: "10%",
-          background: tipColor,
+          left: `${(1 - TARJA_FIM - larguraTarja) * 100}%`,
+          right: `${TARJA_FIM * 100}%`,
           gap: grauGap,
           paddingRight: grauMargem,
         }}
       >
+        <span
+          aria-hidden
+          className="absolute inset-0"
+          style={{ background: corDaTarja }}
+        />
+
         {Array.from({ length: stripes }).map((_, i) => (
-          <span key={i} style={{ width: grauW, background: "#ffffff" }} />
+          <span
+            key={i}
+            className="relative"
+            style={{ width: grauW, background: "#ffffff" }}
+          />
         ))}
       </span>
     </div>
@@ -151,6 +190,20 @@ export function BeltChip({
       >
         <rect width="14" height="14" fill={info.color} />
         {info.stripe && <rect y="5" width="14" height="4" fill={info.stripe} />}
+        {/* Coral: a amostra também alterna, senão ela apareceria como uma
+            faixa branca qualquer. */}
+        {info.bodyPattern &&
+          Array.from({ length: 4 }).map((_, i) => (
+            <rect
+              key={i}
+              x={3.5 * i}
+              width="3.5"
+              height="14"
+              fill={
+                info.bodyPattern!.cores[i % info.bodyPattern!.cores.length]
+              }
+            />
+          ))}
         <rect
           x="0.5"
           y="0.5"

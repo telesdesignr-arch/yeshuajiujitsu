@@ -400,12 +400,18 @@ export default async function HomePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardBody className="space-y-3">
+                    {/* Cada faixa aparece com todos os graus dela: quatro nas
+                        coloridas, seis na preta, nenhum na coral. */}
                     {beltsDaTrilha(trilha).map((belt) => (
                       <div key={belt.key}>
                         <p className="mb-1 text-sm font-semibold">
                           Faixa {belt.label}
                         </p>
-                        <BeltBar belt={belt.key} degree={4} height={22} />
+                        <BeltBar
+                          belt={belt.key}
+                          degree={belt.maxDegree}
+                          height={22}
+                        />
                       </div>
                     ))}
                   </CardBody>
