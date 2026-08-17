@@ -286,7 +286,7 @@ export default async function EvolucaoPage() {
                         Concluída
                       </span>
                     ) : (
-                      <DegreeDots degree={0} />
+                      <DegreeDots belt={belt.key} degree={0} />
                     )}
                   </div>
                   <BeltBar belt={belt.key} degree={grausAqui} height={24} />

@@ -13,9 +13,9 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 import {
-  MAX_DEGREE,
   beltInfo,
   beltsDaTrilha,
+  grausDaFaixa,
   graduationRank,
   nextStep,
 } from "../src/lib/belts";
@@ -214,7 +214,9 @@ function buildGraduationHistory(belt: string, degree: number, currentSince: Date
 
   const steps: { belt: string; degree: number }[] = [];
   for (const b of escada) {
-    for (let d = 0; d <= MAX_DEGREE; d++) {
+    // Cada faixa tem a propria escala de graus: as coloridas vao ate o 4o, a
+    // preta ate o 6o e a coral so existe como 7o.
+    for (const d of grausDaFaixa(b.key)) {
       if (graduationRank(b.key, d) > targetRank) break;
       if (compacto && b.key !== belt && d > 0) continue;
       steps.push({ belt: b.key, degree: d });
@@ -228,9 +230,10 @@ function buildGraduationHistory(belt: string, degree: number, currentSince: Date
   for (let i = steps.length - 2; i >= 0; i--) {
     const trocaDeFaixa = steps[i].belt !== steps[i + 1].belt;
     // Uma troca de faixa infantil representa o ciclo inteiro daquela faixa.
+    const anterior = beltInfo(steps[i].belt);
     const gap = trocaDeFaixa
-      ? beltInfo(steps[i].belt).monthsPerDegree * MAX_DEGREE +
-        (beltInfo(steps[i].belt).monthsToNextBelt ?? 6)
+      ? anterior.monthsPerDegree * (anterior.maxDegree - anterior.minDegree) +
+        (anterior.monthsToNextBelt ?? 6)
       : (nextStep(steps[i].belt, steps[i].degree).expectedMonths ?? 6);
     // pequena variacao para nao ficar tudo no mesmo dia do mes
     const jitter = Math.floor(random() * 2);

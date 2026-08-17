@@ -1,0 +1,24 @@
+FOTOS DA ACADEMIA
+=================
+
+Jogue as fotos do site nesta pasta. Elas aparecem no carrossel da tela
+inicial, na seção "Como é por dentro".
+
+Formatos aceitos: .jpg  .jpeg  .png  .webp  .avif
+
+A ORDEM é a alfabética. Coloque um número na frente para mandar na ordem:
+
+    01-tatame.jpg
+    02-turma-adulto.jpg
+    03-turma-kids.jpg
+    04-boxe.jpg
+    05-graduacao.jpg
+
+O NOME DO ARQUIVO vira a descrição da foto para quem usa leitor de tela e
+para o Google. Por isso "04-boxe.jpg" é melhor que "IMG_20260817.jpg".
+
+TAMANHO: mande no máximo uns 1600 pixels de largura e salve como JPG. Foto
+direto do celular tem 8 MP e deixa o site lento para quem abre pelo 4G.
+
+Não precisa mexer em nenhum arquivo de código: a lista é montada sozinha
+quando o site é publicado.

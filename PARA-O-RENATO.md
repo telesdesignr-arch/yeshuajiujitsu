@@ -19,14 +19,24 @@ quem está perto de graduar, na tela **Graduações**.
 
 ## Tempo entre graus — adulto
 
-| Faixa | Tempo por grau | Tempo no 4º grau antes de trocar de faixa |
-|---|---|---|
-| Branca | 4 meses | 6 meses |
-| Azul | 6 meses | 6 meses |
-| Roxa | 5 meses | 6 meses |
-| Marrom | 4 meses | 6 meses |
+| Faixa | Graus | Tempo por grau | Tempo no último grau antes de trocar de faixa |
+|---|---|---|---|
+| Branca | até o 4º | 4 meses | 6 meses |
+| Azul | até o 4º | 6 meses | 6 meses |
+| Roxa | até o 4º | 5 meses | 6 meses |
+| Marrom | até o 4º | 4 meses | 6 meses |
+| Preta | até o 6º | 3 anos | 7 anos até a coral |
+| Branca e Vermelha (coral) | só o 7º | — | topo da escada |
 
 **Está certo? Se não, quais são os tempos reais?**
+
+Duas coisas para conferir na coral:
+
+1. Desenhei ela como **faixa branca com uma listra vermelha no meio**, seguindo
+   a mesma lógica das faixas infantis compostas. Se na verdade for o contrário
+   (corpo vermelho com listra branca), me avise que eu inverto.
+2. **Depois da coral tem mais alguma?** Faixa vermelha, 8º grau? Hoje a coral é
+   o fim da escada no sistema.
 
 ## Tempo entre graus — infantil
 

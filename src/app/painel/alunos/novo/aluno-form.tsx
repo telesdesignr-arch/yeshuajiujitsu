@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/field";
 import { BeltSelectOptions } from "@/components/belt";
-import { MAX_DEGREE } from "@/lib/belts";
+import { CamposDeGraduacao } from "@/components/campos-graduacao";
 import { MODALITY_OPTIONS } from "@/lib/modalities";
 import { hojeISO } from "@/lib/dates";
 
@@ -126,23 +126,7 @@ export function AlunoForm() {
           <CardTitle>Graduação atual</CardTitle>
         </CardHeader>
         <CardBody className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Faixa" htmlFor="belt" required>
-              <Select id="belt" name="belt" defaultValue="BRANCA" required>
-                <BeltSelectOptions />
-              </Select>
-            </Field>
-
-            <Field label="Graus" htmlFor="degree" required>
-              <Select id="degree" name="degree" defaultValue="0" required>
-                {Array.from({ length: MAX_DEGREE + 1 }).map((_, i) => (
-                  <option key={i} value={i}>
-                    {i === 0 ? "Faixa lisa (sem grau)" : `${i}º grau`}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
+          <CamposDeGraduacao idPrefix="novo" mostraPreview />
 
           <Field
             label="Desde quando está nesta graduação"

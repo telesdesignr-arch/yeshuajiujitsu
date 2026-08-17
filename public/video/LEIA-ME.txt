@@ -1,0 +1,25 @@
+VÍDEO DO TOPO DA TELA INICIAL
+=============================
+
+O vídeo entra como fundo do bloco onde está escrito "O TATAME MUDA QUEM
+VOCÊ É". Ele roda sozinho, mudo e em loop.
+
+COLOQUE OS ARQUIVOS COM ESTES NOMES EXATOS:
+
+    hero.mp4    (obrigatório -- é o que o iPhone entende com certeza)
+    hero.webm   (opcional -- costuma ficar bem menor, o site usa se existir)
+    hero.jpg    (recomendado -- a imagem parada que aparece antes do vídeo)
+
+COMO GRAVAR
+- Deitado (horizontal), nunca em pé.
+- De 8 a 15 segundos. É um fundo, não um filme: ele fica repetindo.
+- Movimento calmo. Câmera tremendo ou corte rápido atrapalha a leitura do
+  texto que fica por cima.
+- Sem áudio importante: o vídeo toca MUDO (é regra dos navegadores, e ninguém
+  gosta de som começando sozinho).
+
+TAMANHO: tente ficar abaixo de 5 MB. Vídeo pesado faz o site demorar a abrir
+justamente para quem está chegando pela primeira vez.
+
+Se não houver vídeo nenhum aqui, o topo continua com o fundo preto de sempre.
+Nada quebra.

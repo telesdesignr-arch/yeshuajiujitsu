@@ -14,7 +14,9 @@ import {
 } from "lucide-react";
 
 import { BeltBar } from "@/components/belt";
+import { Carrossel } from "@/components/carrossel";
 import { CompetitionImage } from "@/components/competition-image";
+import { VideoTopo } from "@/components/video-topo";
 import { MedalTallyRow } from "@/components/medal";
 import { EventTypeBadge, TURMAS_JOVENS, classType } from "@/components/event-type";
 import { ButtonLink } from "@/components/ui/button";
@@ -24,11 +26,17 @@ import { TRACK_LABEL, beltsDaTrilha } from "@/lib/belts";
 import { ACADEMIA, whatsappLink } from "@/lib/academia";
 import { modalityLabel, tallyMedals } from "@/lib/competitions";
 import { WEEKDAYS, formatDateLong, formatDateShortYear } from "@/lib/dates";
+import { FOTOS_DA_ACADEMIA, VIDEO_DO_TOPO } from "@/lib/midia-gerada";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  // A lista sai de src/lib/midia-gerada.ts, montada na hora do build a partir
+  // das pastas public/fotos e public/video.
+  const fotos = FOTOS_DA_ACADEMIA;
+  const video = VIDEO_DO_TOPO;
+
   const [schedules, events, alunosAtivos, campeonatos, resultados] = await Promise.all([
     prisma.classSchedule.findMany({
       where: { active: true },
@@ -76,17 +84,33 @@ export default async function HomePage() {
       {/* Hero                                                                 */}
       {/* ==================================================================== */}
       <section className="bg-tatame relative overflow-hidden px-4 pt-14 pb-16 text-white sm:px-6 sm:pt-20 sm:pb-24">
+        {/* Vídeo de fundo, quando a academia tiver enviado um. Sem vídeo, o
+            topo continua exatamente como era: fundo preto texturizado. */}
+        {video && (
+          <>
+            <VideoTopo video={video} />
+            {/* Véu escuro por cima: sem ele o texto branco some em qualquer
+                trecho claro do vídeo, e o contraste deixa de ser acessível. */}
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-r from-ink/92 via-ink/78 to-ink/55"
+            />
+          </>
+        )}
+
         {/* Faixa de marca no topo, no lugar de uma borda comum */}
-        <span aria-hidden className="rule-marca absolute inset-x-0 top-0" />
+        <span aria-hidden className="rule-marca absolute inset-x-0 top-0 z-10" />
 
         {/* Faixa preta gigante atravessando o fundo na diagonal. Fica quase
             invisível, mas dá profundidade e é a única forma do logo. */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-24 -right-40 h-[34rem] w-[34rem] rotate-12 rounded-full border-[3rem] border-white/[0.035]"
-        />
+        {!video && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-24 -right-40 h-[34rem] w-[34rem] rotate-12 rounded-full border-[3rem] border-white/[0.035]"
+          />
+        )}
 
-        <div className="cascata relative mx-auto max-w-6xl">
+        <div className="cascata relative z-10 mx-auto max-w-6xl">
           <p className="text-sm font-semibold tracking-[0.24em] text-brand-300 uppercase">
             Rio de Janeiro · Jiu-Jitsu e boxe
           </p>
@@ -227,6 +251,30 @@ export default async function HomePage() {
       </section>
 
       {/* ==================================================================== */}
+      {/* Fotos da academia                                                    */}
+      {/* ==================================================================== */}
+      {fotos.length > 0 && (
+        <section
+          id="fotos"
+          className="scroll-mt-20 border-t border-line px-4 py-16 sm:px-6 sm:py-24"
+        >
+          <div className="mx-auto max-w-6xl">
+            <p className="eyebrow">A academia</p>
+            <h2 className="mt-3 font-display text-4xl font-bold tracking-wide uppercase sm:text-5xl">
+              Como é por dentro
+            </h2>
+            <p className="mt-4 max-w-2xl text-lg text-ink-500">
+              O tatame, as turmas e os dias de competição.
+            </p>
+
+            <div className="mt-10">
+              <Carrossel fotos={fotos} />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ==================================================================== */}
       {/* Horários                                                             */}
       {/* ==================================================================== */}
       <section
@@ -318,8 +366,10 @@ export default async function HomePage() {
               </h2>
               <p className="mt-4 text-lg text-ink-500">
                 No Jiu-Jitsu a graduação vem pela presença, não pelo calendário.
-                Cada faixa tem quatro graus, e o grau só sai quando o professor
-                vê que a técnica e a postura amadureceram.
+                As faixas coloridas têm quatro graus cada uma, e o grau só sai
+                quando o professor vê que a técnica e a postura amadureceram. A
+                faixa preta vai mais longe: são seis graus, e depois dela vem a
+                coral, que já é o 7º.
               </p>
               <p className="mt-4 text-lg text-ink-500">
                 Quem tem até 15 anos segue a escada infantil, que tem treze

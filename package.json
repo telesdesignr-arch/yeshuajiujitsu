@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3200",
-    "build": "prisma generate && next build",
+    "dev": "node scripts/listar-midia.mjs && next dev -p 3200",
+    "build": "node scripts/listar-midia.mjs && prisma generate && next build",
+    "midia": "node scripts/listar-midia.mjs",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",

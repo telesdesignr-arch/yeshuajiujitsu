@@ -92,7 +92,7 @@ export default async function GraduacoesPage() {
                             <p className="truncate font-semibold">{c.name}</p>
                             <div className="mt-0.5 flex items-center gap-2">
                               <BeltChip belt={c.belt} degree={c.degree} size="sm" />
-                              <DegreeDots degree={c.degree} />
+                              <DegreeDots belt={c.belt} degree={c.degree} />
                             </div>
                           </div>
                           <ChevronRight
@@ -182,7 +182,7 @@ export default async function GraduacoesPage() {
                             <BeltChip belt={c.belt} degree={0} size="sm" />
                           </td>
                           <td className="px-4 py-3">
-                            <DegreeDots degree={c.degree} />
+                            <DegreeDots belt={c.belt} degree={c.degree} />
                           </td>
                           <td className="tabular px-4 py-3">
                             <Badge

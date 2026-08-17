@@ -5,7 +5,12 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { hashPassword, requireStaff, requireUser } from "@/lib/auth";
-import { BELT_KEYS, MAX_DEGREE, graduationRank } from "@/lib/belts";
+import {
+  BELT_KEYS,
+  MAX_DEGREE,
+  erroDeGraduacao,
+  graduationRank,
+} from "@/lib/belts";
 import { dataBrasileira, naAcademia } from "@/lib/dates";
 import { fotoValida } from "@/lib/foto";
 import { prisma } from "@/lib/prisma";
@@ -111,6 +116,9 @@ export async function createStudent(
 
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const data = parsed.data;
+
+  const erroGrad = erroDeGraduacao(data.belt, data.degree);
+  if (erroGrad && data.modality !== "BOXE") return { error: erroGrad };
 
   const jaExiste = await prisma.user.findUnique({ where: { email: data.email } });
   if (jaExiste) {
@@ -425,6 +433,10 @@ export async function addGraduation(
 
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
+
+  const erroGrad = erroDeGraduacao(d.belt, d.degree);
+  if (erroGrad) return { error: erroGrad };
+
   const dataGraduacao = dataBrasileira(d.date);
 
   await prisma.$transaction([
@@ -531,6 +543,9 @@ export async function updateGraduation(
 
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
+
+  const erroGrad = erroDeGraduacao(d.belt, d.degree);
+  if (erroGrad) return { error: erroGrad };
 
   const graduacao = await prisma.graduation.update({
     where: { id: d.graduationId },

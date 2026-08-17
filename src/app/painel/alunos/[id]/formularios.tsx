@@ -14,6 +14,7 @@ import {
 import { updateStudentFinance } from "@/actions/financeiro";
 import { formatMoney, formatMoneyInput } from "@/lib/money";
 import { BeltBar, BeltSelectOptions } from "@/components/belt";
+import { CamposDeGraduacao } from "@/components/campos-graduacao";
 import { Button } from "@/components/ui/button";
 import { Field, FormAlert, Input, Select, Textarea } from "@/components/ui/field";
 import {
@@ -70,8 +71,6 @@ export function GraduacaoForm({
     {},
   );
   const sugestao = nextStep(beltAtual, degreeAtual);
-  const [belt, setBelt] = useState(sugestao.belt);
-  const [degree, setDegree] = useState(String(sugestao.degree));
 
   return (
     <form action={formAction} className="space-y-4" noValidate>
@@ -80,45 +79,12 @@ export function GraduacaoForm({
       {state.error && <FormAlert>{state.error}</FormAlert>}
       {state.success && <FormAlert tone="success">{state.success}</FormAlert>}
 
-      <div className="rounded-[10px] bg-ink-100 p-3">
-        <p className="mb-2 text-xs font-semibold tracking-wide text-ink-500 uppercase">
-          Como vai ficar
-        </p>
-        <BeltBar belt={belt} degree={Number(degree)} height={30} />
-        <p className="mt-2 text-sm font-semibold">
-          {graduationLabel(belt, Number(degree))}
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Faixa" htmlFor="grad-belt" required>
-          <Select
-            id="grad-belt"
-            name="belt"
-            value={belt}
-            onChange={(e) => setBelt(e.target.value as typeof belt)}
-            required
-          >
-            <BeltSelectOptions />
-          </Select>
-        </Field>
-
-        <Field label="Graus" htmlFor="grad-degree" required>
-          <Select
-            id="grad-degree"
-            name="degree"
-            value={degree}
-            onChange={(e) => setDegree(e.target.value)}
-            required
-          >
-            {Array.from({ length: MAX_DEGREE + 1 }).map((_, i) => (
-              <option key={i} value={i}>
-                {i === 0 ? "Faixa lisa (sem grau)" : `${i}º grau`}
-              </option>
-            ))}
-          </Select>
-        </Field>
-      </div>
+      <CamposDeGraduacao
+        idPrefix="grad"
+        beltPadrao={sugestao.belt}
+        grauPadrao={sugestao.degree}
+        mostraPreview
+      />
 
       <Field label="Data da graduação" htmlFor="grad-date" required>
         <Input
@@ -192,9 +158,6 @@ export function EditarGraduacaoForm({
     updateGraduation,
     {},
   );
-  const [belt, setBelt] = useState(beltInicial);
-  const [degree, setDegree] = useState(String(degreeInicial));
-
   return (
     <form action={formAction} className="space-y-4" noValidate>
       <input type="hidden" name="graduationId" value={graduationId} />
@@ -202,42 +165,12 @@ export function EditarGraduacaoForm({
       {state.error && <FormAlert>{state.error}</FormAlert>}
       {state.success && <FormAlert tone="success">{state.success}</FormAlert>}
 
-      <div className="rounded-[10px] bg-ink-100 p-3">
-        <BeltBar belt={belt} degree={Number(degree)} height={28} />
-        <p className="mt-2 text-sm font-semibold">
-          {graduationLabel(belt, Number(degree))}
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Faixa" htmlFor={`eg-belt-${graduationId}`} required>
-          <Select
-            id={`eg-belt-${graduationId}`}
-            name="belt"
-            value={belt}
-            onChange={(e) => setBelt(e.target.value)}
-            required
-          >
-            <BeltSelectOptions />
-          </Select>
-        </Field>
-
-        <Field label="Graus" htmlFor={`eg-deg-${graduationId}`} required>
-          <Select
-            id={`eg-deg-${graduationId}`}
-            name="degree"
-            value={degree}
-            onChange={(e) => setDegree(e.target.value)}
-            required
-          >
-            {Array.from({ length: MAX_DEGREE + 1 }).map((_, i) => (
-              <option key={i} value={i}>
-                {i === 0 ? "Faixa lisa (sem grau)" : `${i}º grau`}
-              </option>
-            ))}
-          </Select>
-        </Field>
-      </div>
+      <CamposDeGraduacao
+        idPrefix={`eg-${graduationId}`}
+        beltPadrao={beltInicial}
+        grauPadrao={degreeInicial}
+        mostraPreview
+      />
 
       <Field label="Data da graduação" htmlFor={`eg-date-${graduationId}`} required>
         <Input

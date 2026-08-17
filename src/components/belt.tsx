@@ -2,7 +2,6 @@ import {
   beltInfo,
   beltsDaTrilha,
   graduationLabel,
-  MAX_DEGREE,
   TRACK_LABEL,
   type Track,
 } from "@/lib/belts";
@@ -52,8 +51,10 @@ export function BeltBar({
   height?: number;
 }) {
   const info = beltInfo(belt);
-  const isBlack = info.key === "PRETA";
-  const tipColor = isBlack ? "#a4161a" : "#111111";
+  // Ponteira vermelha na preta e na coral, preta nas coloridas -- como manda a
+  // tradição do Jiu-Jitsu.
+  const pontaVermelha = info.key === "PRETA" || info.key === "CORAL";
+  const tipColor = pontaVermelha ? "#a4161a" : "#111111";
 
   // Faixas claras somem no fundo branco: ganham um contorno discreto.
   const claras = ["#f2f0ed", "#f2c009"];
@@ -61,7 +62,12 @@ export function BeltBar({
     ? "rgba(20,16,13,0.22)"
     : "rgba(20,16,13,0.10)";
 
-  const stripes = Math.max(0, Math.min(MAX_DEGREE, degree));
+  // As marcas contam o avanço DENTRO da faixa. Na coral, que já entra como 7º
+  // grau, isso dá zero marcas -- e está certo: ali a faixa é a graduação.
+  const stripes = Math.max(
+    0,
+    Math.min(info.maxDegree, degree) - info.minDegree,
+  );
 
   // A faixa e montada com elementos reais, e nao com um SVG esticado.
   //
@@ -160,26 +166,39 @@ export function BeltChip({
   );
 }
 
-/** Quatro marcas de grau, preenchidas conforme a graduacao atual. */
+/**
+ * Marcas de grau da faixa, preenchidas conforme a graduacao atual.
+ *
+ * Quantas marcas aparecem depende da faixa: quatro nas coloridas, seis na
+ * preta. Na coral nao aparece nenhuma, porque a propria faixa e o grau.
+ */
 export function DegreeDots({
+  belt = "BRANCA",
   degree,
   className,
 }: {
+  belt?: string;
   degree: number;
   className?: string;
 }) {
+  const info = beltInfo(belt);
+  const total = info.maxDegree - info.minDegree;
+  const preenchidas = Math.max(0, Math.min(info.maxDegree, degree) - info.minDegree);
+
+  if (total === 0) return null;
+
   return (
     <span
       className={cn("inline-flex items-center gap-1", className)}
-      aria-label={`${degree} de ${MAX_DEGREE} graus`}
+      aria-label={`${preenchidas} de ${total} graus`}
     >
-      {Array.from({ length: MAX_DEGREE }).map((_, i) => (
+      {Array.from({ length: total }).map((_, i) => (
         <span
           key={i}
           aria-hidden
           className={cn(
             "block h-3.5 w-1.5 rounded-[1px]",
-            i < degree ? "bg-ink" : "bg-ink-200",
+            i < preenchidas ? "bg-ink" : "bg-ink-200",
           )}
         />
       ))}

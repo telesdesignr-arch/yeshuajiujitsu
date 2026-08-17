@@ -6,11 +6,20 @@
  *   INFANTIL (ate 15 anos) -- 13 faixas, de Branca a Verde e Preta
  *   ADULTO   (16 anos ou mais) -- 5 faixas, de Branca a Preta
  *
- * Cada faixa tem 4 graus. O caminho e sempre:
+ * Quase toda faixa tem 4 graus. O caminho e:
  *   Faixa lisa -> 1o Grau -> 2o Grau -> 3o Grau -> 4o Grau -> proxima faixa
  *
- * Nas faixas de nome composto ("Verde e Preta"), a PRIMEIRA cor e o corpo da
- * faixa e a SEGUNDA e uma listra que corre de ponta a ponta pelo meio dela.
+ * DUAS EXCECOES no topo da escada adulta:
+ *
+ *   PRETA vai ate o 6o Grau (e nao ate o 4o).
+ *
+ *   CORAL nao comeca do zero. Ela JA E o 7o grau: quem sai da preta 6o grau
+ *   entra direto na coral como 7o. Nao existe "coral 1o grau". Por isso ela
+ *   tem minDegree e maxDegree iguais a 7.
+ *
+ * Nas faixas de nome composto ("Verde e Preta", "Branca e Vermelha"), a
+ * PRIMEIRA cor e o corpo da faixa e a SEGUNDA e uma listra que corre de ponta
+ * a ponta pelo meio dela.
  *
  * Os tempos abaixo sao referencias para o sistema sugerir quem esta proximo
  * de graduar. Quem decide continua sendo o professor -- o sistema so avisa.
@@ -28,13 +37,24 @@ export type BeltDef = {
   color: string;
   /** listra central que corre de ponta a ponta, nas faixas compostas */
   stripe?: string;
+  /** primeiro grau possivel nesta faixa (0 em todas, menos a coral, que e 7) */
+  minDegree: number;
+  /** ultimo grau possivel nesta faixa */
+  maxDegree: number;
   /** meses de treino esperados entre um grau e o proximo */
   monthsPerDegree: number;
-  /** meses esperados no 4o grau antes da proxima faixa */
+  /** meses esperados no ultimo grau antes da proxima faixa */
   monthsToNextBelt: number | null;
 };
 
-export const MAX_DEGREE = 4;
+/** Graus de uma faixa normal: lisa ate o 4o. */
+const GRAUS_PADRAO = { minDegree: 0, maxDegree: 4 };
+
+/**
+ * Maior grau que existe no sistema. Serve so como teto de validacao; o limite
+ * que vale de verdade e o da faixa (`maxDegree`).
+ */
+export const MAX_DEGREE = 7;
 
 /* -------------------------------------------------------------------------- */
 /* Cores                                                                       */
@@ -50,6 +70,7 @@ const COR = {
   roxa: "#5b2c87",
   marrom: "#6b4423",
   preta: "#111111",
+  vermelha: "#c1121f",
 } as const;
 
 /* -------------------------------------------------------------------------- */
@@ -86,6 +107,7 @@ const INFANTIL: BeltDef[] = [
   ...b,
   track: "INFANTIL" as const,
   order: i,
+  ...GRAUS_PADRAO,
   ...RITMO_INFANTIL,
 }));
 
@@ -94,11 +116,33 @@ const INFANTIL: BeltDef[] = [
 /* -------------------------------------------------------------------------- */
 
 const ADULTO: BeltDef[] = [
-  { key: "BRANCA", label: "Branca", color: COR.branca, monthsPerDegree: 4, monthsToNextBelt: 6 },
-  { key: "AZUL", label: "Azul", color: COR.azul, monthsPerDegree: 6, monthsToNextBelt: 6 },
-  { key: "ROXA", label: "Roxa", color: COR.roxa, monthsPerDegree: 5, monthsToNextBelt: 6 },
-  { key: "MARROM", label: "Marrom", color: COR.marrom, monthsPerDegree: 4, monthsToNextBelt: 6 },
-  { key: "PRETA", label: "Preta", color: COR.preta, monthsPerDegree: 36, monthsToNextBelt: null },
+  { key: "BRANCA", label: "Branca", color: COR.branca, ...GRAUS_PADRAO, monthsPerDegree: 4, monthsToNextBelt: 6 },
+  { key: "AZUL", label: "Azul", color: COR.azul, ...GRAUS_PADRAO, monthsPerDegree: 6, monthsToNextBelt: 6 },
+  { key: "ROXA", label: "Roxa", color: COR.roxa, ...GRAUS_PADRAO, monthsPerDegree: 5, monthsToNextBelt: 6 },
+  { key: "MARROM", label: "Marrom", color: COR.marrom, ...GRAUS_PADRAO, monthsPerDegree: 4, monthsToNextBelt: 6 },
+  // Preta: seis graus, e nao quatro. Tres anos por grau e uma referencia
+  // conhecida do Jiu-Jitsu; do 6o grau para a coral sao cerca de sete anos.
+  {
+    key: "PRETA",
+    label: "Preta",
+    color: COR.preta,
+    minDegree: 0,
+    maxDegree: 6,
+    monthsPerDegree: 36,
+    monthsToNextBelt: 84,
+  },
+  // Coral: entra direto como 7o grau. Nao ha grau anterior dentro dela, por
+  // isso minDegree = maxDegree = 7.
+  {
+    key: "CORAL",
+    label: "Branca e Vermelha",
+    color: COR.branca,
+    stripe: COR.vermelha,
+    minDegree: 7,
+    maxDegree: 7,
+    monthsPerDegree: 0,
+    monthsToNextBelt: null,
+  },
 ].map((b, i) => ({ ...b, track: "ADULTO" as const, order: i }));
 
 /* -------------------------------------------------------------------------- */
@@ -137,21 +181,76 @@ export const TRACK_LABEL: Record<Track, string> = {
   ADULTO: "Adulto (16 anos ou mais)",
 };
 
+/** Graus que existem dentro da faixa, do menor ao maior. Ex.: [0,1,2,3,4]. */
+export function grausDaFaixa(belt: string) {
+  const info = beltInfo(belt);
+  const quantos = info.maxDegree - info.minDegree + 1;
+  return Array.from({ length: quantos }, (_, i) => info.minDegree + i);
+}
+
+/** Encaixa um grau dentro do que a faixa aceita. */
+export function grauValido(belt: string, degree: number) {
+  const info = beltInfo(belt);
+  return Math.min(info.maxDegree, Math.max(info.minDegree, degree));
+}
+
+/**
+ * Confere se o par (faixa, grau) existe de verdade. Devolve a mensagem de erro
+ * ou null quando esta certo.
+ *
+ * O formulario ja impede escolher um grau que a faixa nao tem, mas a checagem
+ * precisa existir tambem no servidor: e o que garante que nao entre uma "coral
+ * 2o grau" no banco por um pedido montado a mao.
+ */
+export function erroDeGraduacao(belt: string, degree: number): string | null {
+  const info = beltInfo(belt);
+  if (degree >= info.minDegree && degree <= info.maxDegree) return null;
+
+  if (info.minDegree === info.maxDegree) {
+    return `A faixa ${info.label} é sempre ${info.minDegree}º grau: não existe outro grau nela.`;
+  }
+  return `A faixa ${info.label} vai da lisa até o ${info.maxDegree}º grau.`;
+}
+
 /** "Faixa Verde e Preta · 2º Grau" / "Faixa Branca (lisa)" */
 export function graduationLabel(belt: string, degree: number) {
-  const name = `Faixa ${beltLabel(belt)}`;
+  const info = beltInfo(belt);
+  const name = `Faixa ${info.label}`;
   if (degree <= 0) return `${name} (lisa)`;
   return `${name} · ${degree}º Grau`;
 }
 
 /**
+ * Quantos degraus a faixa ocupa na escada. A preta ocupa 7 (lisa ate o 6o) e a
+ * coral ocupa 1 (so o 7o), enquanto as demais ocupam 5 (lisa ate o 4o).
+ */
+function degraus(b: BeltDef) {
+  return b.maxDegree - b.minDegree + 1;
+}
+
+/**
  * Posicao absoluta na escada, para comparar dois alunos.
+ *
+ * Nao da para multiplicar a ordem da faixa por um numero fixo de graus, porque
+ * as faixas tem quantidades diferentes: a soma corrida abaixo e o que mantem a
+ * ordem correta mesmo com preta de 6 graus e coral de um so.
+ *
  * As trilhas nao se misturam: o infantil vem antes do adulto.
  */
+const OFFSET_DA_FAIXA = new Map<string, number>();
+for (const trilha of ["INFANTIL", "ADULTO"] as Track[]) {
+  let acumulado = 0;
+  for (const b of trilha === "INFANTIL" ? INFANTIL : ADULTO) {
+    OFFSET_DA_FAIXA.set(b.key, acumulado);
+    acumulado += degraus(b);
+  }
+}
+
 export function graduationRank(belt: string, degree: number) {
   const info = beltInfo(belt);
   const base = info.track === "INFANTIL" ? 0 : 1000;
-  return base + info.order * (MAX_DEGREE + 1) + Math.min(degree, MAX_DEGREE);
+  const dentroDaFaixa = grauValido(belt, degree) - info.minDegree;
+  return base + (OFFSET_DA_FAIXA.get(info.key) ?? 0) + dentroDaFaixa;
 }
 
 export type NextStep = {
@@ -167,8 +266,9 @@ export function nextStep(belt: string, degree: number): NextStep {
   const current = beltInfo(belt);
   const escada = beltsDaTrilha(current.track);
 
-  if (degree < MAX_DEGREE) {
-    const target = degree + 1;
+  // Ainda ha grau a subir dentro da propria faixa.
+  if (degree < current.maxDegree) {
+    const target = Math.max(current.minDegree, degree + 1);
     return {
       kind: "GRAU",
       belt: current.key,
@@ -195,17 +295,22 @@ export function nextStep(belt: string, degree: number): NextStep {
     return {
       kind: "FINAL",
       belt: current.key,
-      degree: MAX_DEGREE,
-      label: "Faixa Preta 4º Grau, topo da escada",
+      degree: current.maxDegree,
+      label: `Faixa ${current.label}, topo da escada`,
       expectedMonths: null,
     };
   }
 
+  // A proxima faixa comeca no primeiro grau DELA: da preta 6o grau o aluno vai
+  // para a coral ja como 7o, e nao para uma "coral lisa".
   return {
     kind: "FAIXA",
     belt: next.key,
-    degree: 0,
-    label: `Faixa ${next.label}`,
+    degree: next.minDegree,
+    label:
+      next.minDegree > 0
+        ? `Faixa ${next.label} · ${next.minDegree}º Grau`
+        : `Faixa ${next.label}`,
     expectedMonths: current.monthsToNextBelt,
   };
 }
